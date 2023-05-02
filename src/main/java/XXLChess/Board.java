@@ -16,7 +16,7 @@ public class Board{
 
     public void makeBoard(){
         try {
-            int success = 0;
+            // int success = 0;
             File f = new File("level1.txt");
             Scanner scan = new Scanner(f);
 
@@ -27,41 +27,39 @@ public class Board{
                 System.out.println(s);
 
                 // if an empty line, skip to next line and add empty row to array
-                if (s == ""){
-                    ArrayList<Piece> emptyRow = new ArrayList<Piece>(14);
+                if (s.isEmpty()){
+                    ArrayList<Piece> emptyRow = new ArrayList<Piece>();
                     for (int i = 0; i < 14; i++){
                         emptyRow.add(null);
+                        System.out.println("added empty cell!");
                     }
                     boardArray.add(emptyRow);
                     System.out.println("emptyRow!");
                     continue;
                 }
 
+                ArrayList<Piece> boardRow = new ArrayList<>();
                 for (int x = 0; x < 14; x++){ // reading horizontally
-                    ArrayList<Piece> boardRow = new ArrayList<Piece>();
-                    
-                    // types of pieces
-                    int pieceNum = 1;
-                    System.out.println("got this far");
-                    String currentPiece = s.substring((pieceNum - 1), pieceNum);
-                    switch (currentPiece){
-                    case "R":
-                        Piece bRook = new Rook(black);
-                        boardRow.add(bRook);
-                        System.out.println("added black piece");
-                    case "r":
-                        Piece wRook = new Rook(white);
-                        boardRow.add(wRook);
-                        System.out.println("added white piece");
-                    }
-                    pieceNum++;
-                    boardArray.add(boardRow);
-                    System.out.println("onto the next part!");
-                    success++;
-                    System.out.println(boardRow);
-                    System.out.println(boardRow.size());
-                    
+                    char c = s.charAt(x);
+                        switch (c){
+                            case 'R':
+                                Piece bRook = new Rook(black);
+                                boardRow.add(bRook);
+                                System.out.println("added black rook");
+                                break;
+                            case 'r':
+                                Piece wRook = new Rook(white);
+                                boardRow.add(wRook);
+                                System.out.println("added white rook");
+                                break;
+                        }
                 }
+                // pieceNum++;
+                boardArray.add(boardRow);
+                System.out.println("onto the next part!");
+                // success++;
+                System.out.println(boardRow);
+                System.out.println(boardRow.size());
             }
                 // if is a certain type of piece, create that piece
                 // place in a certain point on the board
@@ -70,8 +68,8 @@ public class Board{
             }
     }
     
-    // public displayPieces(){
-    //     // show read through the array, and display pieces on the board
+    // public void displayPieces() {
+        
     // }
 }
 

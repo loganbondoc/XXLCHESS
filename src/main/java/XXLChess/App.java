@@ -118,6 +118,7 @@ public class App extends PApplet {
         // create board
         Board board = new Board();
         board.makeBoard();
+        board.displayPieces();
         // System.out.println(board.boardArray);
     }
 
