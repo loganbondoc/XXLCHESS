@@ -31,6 +31,12 @@ public class App extends PApplet {
 
     public ArrayList<ArrayList<Piece>> boardArray; 
 
+    // boolean for if your choosing a piece to move or if you are moving a piece
+    public boolean choosingPiece = true;
+    // public Piece selectedPiece;
+    // public int xPos;
+    // public int yPos;
+
     // App happens before main
     
     public App() {
@@ -110,10 +116,6 @@ public class App extends PApplet {
 
 
 
-
-        // Board board = new Board();
-        // board.makeBoard();
-
         // // Load images during setup
         
         // for(int i = 0; i < 14; i++){
@@ -141,7 +143,6 @@ public class App extends PApplet {
     */
     public void keyPressed(){
 
-
     }
     
     /**
@@ -154,6 +155,86 @@ public class App extends PApplet {
     @Override
     public void mouseClicked(MouseEvent e) {
         
+        System.out.println("Real mouse position is" + mouseX + " , " + mouseY);
+        int xPos = mouseX;
+        int yPos = mouseY;
+        int xNum = mouseX % CELLSIZE;
+        int yNum = mouseY % CELLSIZE;
+
+        // Round mouseX position to closest multiple of CELLSIZE
+        if (xNum > 5){
+            xPos = xPos + (CELLSIZE - xNum);
+        } else {
+            xPos = xPos - xNum;
+        }
+
+        // If rounded higher than 14
+        if ((xPos / CELLSIZE) > 14){
+            xPos = CELLSIZE * 14;
+        }
+
+        // Round mouseY position to closest multiple of CELLSIZE
+        if (yNum > 5){
+            yPos = yPos + (CELLSIZE - yNum);
+        } else {
+            yPos = yPos - yNum;
+        }
+
+        // If rounded higher than 14
+        if ((yPos / CELLSIZE) > 14){
+            yPos = CELLSIZE * 14;
+        }
+
+        // Accessing selected piece
+        int i = yPos / CELLSIZE;
+        int j = xPos / CELLSIZE;
+        System.out.println("Selected square is: " + j + ", "+ i);
+        Piece selectedPiece = boardArray.get((i - 1)).get((j - 1));
+        System.out.println(selectedPiece);
+        
+        // if a piece is chosen and choosing a tile to move to
+        if (choosingPiece == false) {
+            
+            // if they selected an empty tile
+            if (selectedPiece == null){
+                selectedPiece.setX(xPos);
+                selectedPiece.setY(yPos);
+            
+            // if they selected a tile that another piece is on
+            } else {
+                // if its your piece, cannot move
+                // if its their piece KILL
+            }
+        
+        // if they are choosing a piece
+        } else {
+            
+            // if they chose an empty tile
+            if(selectedPiece == null){
+                choosingPiece = true;
+            
+            // if they choose a tile with your thing on it
+            } else if(selectedPiece.getColour() == "white") {
+                // colour it green
+                choosingPiece = false;
+            
+            // if they choose a tile with someone elses thing on it
+            } else {
+                choosingPiece = true;
+            }
+        }
+
+        //THE ISSUE IS THAT THE PIECES ARE STORED ON THE SIDES NOT THE BOTTOM AND TOP
+
+
+
+
+        // find mouse coordinates of where clicked happened
+            // click that same piece again and it'll cancel
+        // need to average it out between a certain coordinate
+        // take the piece that was clicked
+            // if there is no piece that was clicked change boolean do nothing
+
     }
 
     @Override
@@ -165,9 +246,10 @@ public class App extends PApplet {
      * Draw all elements in the game by current frame. 
     */
     public void draw() {
+       
+        // drawing board
         boolean white = true;
         noStroke();
-
         for (int y = 0; y < CELLSIZE * BOARD_WIDTH; y += CELLSIZE){
             for (int x = 0; x < CELLSIZE * BOARD_WIDTH; x += CELLSIZE){
                 
@@ -188,19 +270,24 @@ public class App extends PApplet {
             }
         }
         
+        // drawing green rect of selected piece
+        // if (choosingPiece == false){
+        //     fill(0, 255, 0);
+        //     System.out.println(xPos);
+        //     System.out.println(yPos);
+        //     rect(xPos, yPos, CELLSIZE, CELLSIZE);
+        // }
+
+        // drawing pieces to board
         for(int i = 0; i < 14; i++){
             for(int j = 0; j < 14; j++){
                 Piece cell = boardArray.get(i).get(j);
                 if(cell == null){
                     continue;
                 }
-                System.out.println("ok");
                 cell.draw(this);
-                System.out.println("just drew something");
             }
         }
-
-        // might need to split up makeBoard(), read file and make each piece in App, then set the sprite in setup
     }
 	
 	// Add any additional methods or attributes you want. Please put classes in different files.

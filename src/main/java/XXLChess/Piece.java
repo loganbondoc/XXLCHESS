@@ -7,17 +7,28 @@ public abstract class Piece {
 
     private String colour;
     private PImage sprite;
+    private double value;
     protected int x;
     protected int y;
 
-    public Piece(String colour, int x, int y){
+    public Piece(String colour, int x, int y, double value){
         this.colour = colour;
         this.x = x;
         this.y = y;
+        this.value = value;
     }
 
-    // public abstract void tick();
+    // setter
+    public void setX(int x){
+        this.x = x;
+    }
 
+    public void setY(int y){
+        this.y = y;
+    }
+    
+
+    // getter
     public String getColour(){
         return this.colour;
     }
@@ -29,6 +40,14 @@ public abstract class Piece {
     public int getY(){
         return this.y;
     }
+
+    public double getValue(){
+        return this.value;
+    }
+
+
+    // methods
+    public abstract void tick();
 
     public void setSprite(PImage sprite){
         this.sprite = sprite;
