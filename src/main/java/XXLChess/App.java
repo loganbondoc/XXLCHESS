@@ -29,6 +29,8 @@ public class App extends PApplet {
 	
     public String configPath;
 
+    public ArrayList<ArrayList<Piece>> boardArray; 
+
     // App happens before main
     
     public App() {
@@ -46,11 +48,88 @@ public class App extends PApplet {
      * Load all resources such as images. Initialise the elements such as the player, enemies and map elements.
     */
     public void setup() {
-        frameRate(FPS);
+        
+        // building the board based on "level1.txt"
+        try {
+            // int success = 0;
+            File f = new File("level1.txt");
+            Scanner scan = new Scanner(f);
 
-        // Load images during setup
+            boardArray = new ArrayList<ArrayList<Piece>>();
 
-        PImage spr = loadImage("src/main/resources/XXLChess/"+"b-rook.png");
+            for(int y = 0; y < 14; y++) { // reading vertically
+                String s = scan.nextLine();
+                System.out.println(s);
+
+                // if an empty line, skip to next line and add empty row to array
+                if (s.isEmpty()){
+                    ArrayList<Piece> emptyRow = new ArrayList<Piece>();
+                    for (int i = 0; i < 14; i++){
+                        emptyRow.add(null);
+                        System.out.println("added empty cell!");
+                    }
+                    boardArray.add(emptyRow);
+                    System.out.println("emptyRow!");
+                    continue;
+                }
+
+                ArrayList<Piece> boardRow = new ArrayList<>();
+                for (int x = 0; x < 14; x++){ // reading horizontally
+                    char c = s.charAt(x);
+                        switch (c){
+                            case 'R':
+                                Piece bRook = new Rook("black", (x * CELLSIZE), (y * CELLSIZE));
+                                bRook.setSprite(loadImage("src/main/resources/XXLChess/b-rook.png"));
+                                boardRow.add(bRook);
+                                System.out.println("added black rook");
+                                break;
+                            case 'r':
+                                Piece wRook = new Rook("white", (x * CELLSIZE), (y * CELLSIZE));
+                                wRook.setSprite(loadImage("src/main/resources/XXLChess/w-rook.png"));
+                                boardRow.add(wRook);
+                                System.out.println("added white rook");
+                                break;
+                            default:
+                                boardRow.add(null);
+                                System.out.println("added empty piece");
+                                break;
+                        }
+                }
+                // pieceNum++;
+                boardArray.add(boardRow);
+                System.out.println("onto the next part!");
+                // success++;
+                System.out.println(boardRow);
+                System.out.println(boardRow.size());
+            }
+                // if is a certain type of piece, create that piece
+                // place in a certain point on the board
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+
+
+
+
+        // Board board = new Board();
+        // board.makeBoard();
+
+        // // Load images during setup
+        
+        // for(int i = 0; i < 14; i++){
+        //     for(int j = 0; j < 14; j++){
+        //         Piece piece = board.boardArray.get(i).get(j);
+        //         System.out.println(piece.getClass());
+        //         // switch(piece.getClass()){
+        //         //     case("class Rook"):
+        //         //         this.piece.setSprite(this.loadImage("src/main/resources/XXLChess/"+"b-rook.png"));
+        //         //         break;
+        //         // }
+        //     }
+        // }
+        
+        
+        // PImage spr = loadImage("src/main/resources/XXLChess/"+"b-rook.png")
 
 		// load config
         JSONObject conf = loadJSONObject(new File(this.configPath));
@@ -108,6 +187,20 @@ public class App extends PApplet {
                 white = false; 
             }
         }
+        
+        for(int i = 0; i < 14; i++){
+            for(int j = 0; j < 14; j++){
+                Piece cell = boardArray.get(i).get(j);
+                if(cell == null){
+                    continue;
+                }
+                System.out.println("ok");
+                cell.draw(this);
+                System.out.println("just drew something");
+            }
+        }
+
+        // might need to split up makeBoard(), read file and make each piece in App, then set the sprite in setup
     }
 	
 	// Add any additional methods or attributes you want. Please put classes in different files.
@@ -115,11 +208,6 @@ public class App extends PApplet {
 
     public static void main(String[] args) {
         PApplet.main("XXLChess.App");
-        // create board
-        Board board = new Board();
-        board.makeBoard();
-        board.displayPieces();
-        // System.out.println(board.boardArray);
     }
 
 }
