@@ -33,7 +33,8 @@ public class App extends PApplet {
 
     // boolean for if your choosing a piece to move or if you are moving a piece
     public boolean choosingPiece = true;
-    // public Piece selectedPiece;
+    public Piece selectedPiece;
+    public boolean yourTurn = true;
     // public int xPos;
     // public int yPos;
 
@@ -54,7 +55,7 @@ public class App extends PApplet {
      * Load all resources such as images. Initialise the elements such as the player, enemies and map elements.
     */
     public void setup() {
-        
+        frameRate(FPS);
         // building the board based on "level1.txt"
         try {
             // int success = 0;
@@ -82,6 +83,7 @@ public class App extends PApplet {
                 ArrayList<Piece> boardRow = new ArrayList<>();
                 for (int x = 0; x < 14; x++){ // reading horizontally
                     char c = s.charAt(x);
+                        // initiates new pieces, assigns sprites to each piece and adds them to array
                         switch (c){
                             case 'R':
                                 Piece bRook = new Rook("black", (x * CELLSIZE), (y * CELLSIZE));
@@ -153,26 +155,51 @@ public class App extends PApplet {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mousePressed(MouseEvent e) {
         
-        System.out.println("Real mouse position is" + mouseX + " , " + mouseY);
+        System.out.println("Real mouse position is" + (mouseX) + " , " + (mouseY));
+        
+        // int xPos = (int) (Math.round(mouseX / (double) CELLSIZE) * CELLSIZE);
+        // int yPos = (int) (Math.round(mouseY / (double) CELLSIZE) * CELLSIZE);
+
+        // int xPos = (mouseX + (CELLSIZE/2)) / CELLSIZE * CELLSIZE;
+        // int yPos = (mouseY + (CELLSIZE/2)) / CELLSIZE * CELLSIZE;
+        // int xPos = round((float) mouseX / CELLSIZE) * CELLSIZE;
+        // int yPos = round((float) mouseY / CELLSIZE) * CELLSIZE;
+
+        // int xPos = (int) (Math.floor((mouseX - SIDEBAR) / (double) CELLSIZE));
+        // int yPos = (int) (Math.floor(mouseY / (double) CELLSIZE));
+
+
         int xPos = mouseX;
         int yPos = mouseY;
         int xNum = mouseX % CELLSIZE;
         int yNum = mouseY % CELLSIZE;
+        
+        
+        // adjustment
+        // Round mouseX position to closest multiple of CELLSIZE
+        // if (xNum > CELLSIZE / 2) {
+        //     xPos = xPos + (CELLSIZE - xNum);
+        // } else {
+        //     xPos = xPos - xNum;
+        // }
 
+        // // Round mouseY position to closest multiple of CELLSIZE
+        // if (yNum > CELLSIZE / 2) {
+        //     yPos = yPos + (CELLSIZE - yNum);
+        // } else {
+        //     yPos = yPos - yNum;
+        // }
+
+        // original
         // Round mouseX position to closest multiple of CELLSIZE
         if (xNum > 5){
             xPos = xPos + (CELLSIZE - xNum);
         } else {
             xPos = xPos - xNum;
         }
-
-        // If rounded higher than 14
-        if ((xPos / CELLSIZE) > 14){
-            xPos = CELLSIZE * 14;
-        }
-
+        
         // Round mouseY position to closest multiple of CELLSIZE
         if (yNum > 5){
             yPos = yPos + (CELLSIZE - yNum);
@@ -181,50 +208,80 @@ public class App extends PApplet {
         }
 
         // If rounded higher than 14
+        if ((xPos / CELLSIZE) > 14){
+            xPos = CELLSIZE * 14;
+        }
         if ((yPos / CELLSIZE) > 14){
             yPos = CELLSIZE * 14;
         }
 
-        // Accessing selected piece
-        int i = yPos / CELLSIZE;
-        int j = xPos / CELLSIZE;
-        System.out.println("Selected square is: " + j + ", "+ i);
-        Piece selectedPiece = boardArray.get((i - 1)).get((j - 1));
-        System.out.println(selectedPiece);
         
+        // Accessing selected piece
+        // indexes between the drawn boardtiles and boardArray are different, need to -1
+        int i = (yPos / CELLSIZE) - 1;
+        int j = (xPos / CELLSIZE) - 1;
+        System.out.println("Selected square is: " + (j + 1) + ", "+ (i + 1));
+
         // if a piece is chosen and choosing a tile to move to
         if (choosingPiece == false) {
+            System.out.println("moving a piece");
+            int oldSpotX = (selectedPiece.getX()/CELLSIZE);
+            int oldSpotY = (selectedPiece.getY()/CELLSIZE);
             
             // if they selected an empty tile
-            if (selectedPiece == null){
+            if (boardArray.get(i).get(j) == null){
+                // replace selectedPiece with null and move to new spot in boardArray
+                boardArray.get(oldSpotY).set(oldSpotX, null);
+                boardArray.get(i).set(j, selectedPiece);
+                
+                System.out.println((oldSpotX + 1) + "," + (oldSpotY + 1) + " is now null");
+                System.out.println(selectedPiece + "is now at " + (j + 1) + "," + (i + 1));
+
+                //set new coords
                 selectedPiece.setX(xPos);
                 selectedPiece.setY(yPos);
-            
+                System.out.println("was moved!");
+                choosingPiece = true;
+
+// ONLY BEING DRAWN IN THE WRONG PLACE, THE ARRAY IS FINE
+
+
             // if they selected a tile that another piece is on
+            // if its your piece, cannot move
+            } else if (selectedPiece.getColour() == "white"){
+                System.out.println("ur blocked");
+                choosingPiece = true;
+
+            // if its their piece... KILL
+            } else if (selectedPiece.getColour() == "black"){
+                System.out.println("KILL");
+                choosingPiece = true;
+
             } else {
-                // if its your piece, cannot move
-                // if its their piece KILL
+                System.out.println("HOW DID YOU EVEN GET HERE");
             }
         
-        // if they are choosing a piece
+        // if choosing a piece
         } else {
+            selectedPiece = boardArray.get(i).get(j);
+            System.out.println(selectedPiece);
             
             // if they chose an empty tile
             if(selectedPiece == null){
                 choosingPiece = true;
             
-            // if they choose a tile with your thing on it
+            // if you choose a tile with your thing on it
             } else if(selectedPiece.getColour() == "white") {
-                // colour it green
+                // figure out how to colour tile green
+                System.out.println("piece was chosen");
                 choosingPiece = false;
             
-            // if they choose a tile with someone elses thing on it
+            // if you choose a tile with someone elses piece on it
             } else {
                 choosingPiece = true;
+                System.out.println("not ur piece");
             }
         }
-
-        //THE ISSUE IS THAT THE PIECES ARE STORED ON THE SIDES NOT THE BOTTOM AND TOP
 
 
 
@@ -285,13 +342,13 @@ public class App extends PApplet {
                 if(cell == null){
                     continue;
                 }
+                cell.tick();
                 cell.draw(this);
             }
         }
     }
 	
 	// Add any additional methods or attributes you want. Please put classes in different files.
-
 
     public static void main(String[] args) {
         PApplet.main("XXLChess.App");
