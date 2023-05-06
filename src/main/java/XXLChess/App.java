@@ -158,69 +158,13 @@ public class App extends PApplet {
     public void mousePressed(MouseEvent e) {
         
         System.out.println("Real mouse position is" + (mouseX) + " , " + (mouseY));
-        
-        // int xPos = (int) (Math.round(mouseX / (double) CELLSIZE) * CELLSIZE);
-        // int yPos = (int) (Math.round(mouseY / (double) CELLSIZE) * CELLSIZE);
-
-        // int xPos = (mouseX + (CELLSIZE/2)) / CELLSIZE * CELLSIZE;
-        // int yPos = (mouseY + (CELLSIZE/2)) / CELLSIZE * CELLSIZE;
-        // int xPos = round((float) mouseX / CELLSIZE) * CELLSIZE;
-        // int yPos = round((float) mouseY / CELLSIZE) * CELLSIZE;
-
-        // int xPos = (int) (Math.floor((mouseX - SIDEBAR) / (double) CELLSIZE));
-        // int yPos = (int) (Math.floor(mouseY / (double) CELLSIZE));
-
-
-        int xPos = mouseX;
-        int yPos = mouseY;
-        int xNum = mouseX % CELLSIZE;
-        int yNum = mouseY % CELLSIZE;
-        
-        
-        // adjustment
-        // Round mouseX position to closest multiple of CELLSIZE
-        // if (xNum > CELLSIZE / 2) {
-        //     xPos = xPos + (CELLSIZE - xNum);
-        // } else {
-        //     xPos = xPos - xNum;
-        // }
-
-        // // Round mouseY position to closest multiple of CELLSIZE
-        // if (yNum > CELLSIZE / 2) {
-        //     yPos = yPos + (CELLSIZE - yNum);
-        // } else {
-        //     yPos = yPos - yNum;
-        // }
-
-        // original
-        // Round mouseX position to closest multiple of CELLSIZE
-        if (xNum > 5){
-            xPos = xPos + (CELLSIZE - xNum);
-        } else {
-            xPos = xPos - xNum;
-        }
-        
-        // Round mouseY position to closest multiple of CELLSIZE
-        if (yNum > 5){
-            yPos = yPos + (CELLSIZE - yNum);
-        } else {
-            yPos = yPos - yNum;
-        }
-
-        // If rounded higher than 14
-        if ((xPos / CELLSIZE) > 14){
-            xPos = CELLSIZE * 14;
-        }
-        if ((yPos / CELLSIZE) > 14){
-            yPos = CELLSIZE * 14;
-        }
-
-        
+        int xPos = mouseX / CELLSIZE;
+        int yPos = mouseY / CELLSIZE;
+       
+    
         // Accessing selected piece
-        // indexes between the drawn boardtiles and boardArray are different, need to -1
-        int i = (yPos / CELLSIZE) - 1;
-        int j = (xPos / CELLSIZE) - 1;
-        System.out.println("Selected square is: " + (j + 1) + ", "+ (i + 1));
+        // indexes between the drawn boardtiles and boardArray are different, need to +1 for tile
+        System.out.println("Selected square is: " + (xPos + 1) + ", "+ (yPos + 1));
 
         // if a piece is chosen and choosing a tile to move to
         if (choosingPiece == false) {
@@ -229,22 +173,19 @@ public class App extends PApplet {
             int oldSpotY = (selectedPiece.getY()/CELLSIZE);
             
             // if they selected an empty tile
-            if (boardArray.get(i).get(j) == null){
+            if (boardArray.get(yPos).get(xPos) == null){
                 // replace selectedPiece with null and move to new spot in boardArray
                 boardArray.get(oldSpotY).set(oldSpotX, null);
-                boardArray.get(i).set(j, selectedPiece);
+                boardArray.get(yPos).set(xPos, selectedPiece);
                 
                 System.out.println((oldSpotX + 1) + "," + (oldSpotY + 1) + " is now null");
-                System.out.println(selectedPiece + "is now at " + (j + 1) + "," + (i + 1));
+                System.out.println(selectedPiece + "is now at " + (xPos + 1) + "," + (yPos + 1));
 
                 //set new coords
-                selectedPiece.setX(xPos);
-                selectedPiece.setY(yPos);
+                selectedPiece.setX(xPos * CELLSIZE);
+                selectedPiece.setY(yPos * CELLSIZE);
                 System.out.println("was moved!");
                 choosingPiece = true;
-
-// ONLY BEING DRAWN IN THE WRONG PLACE, THE ARRAY IS FINE
-
 
             // if they selected a tile that another piece is on
             // if its your piece, cannot move
@@ -263,7 +204,7 @@ public class App extends PApplet {
         
         // if choosing a piece
         } else {
-            selectedPiece = boardArray.get(i).get(j);
+            selectedPiece = boardArray.get(yPos).get(xPos);
             System.out.println(selectedPiece);
             
             // if they chose an empty tile
@@ -328,12 +269,10 @@ public class App extends PApplet {
         }
         
         // drawing green rect of selected piece
-        // if (choosingPiece == false){
-        //     fill(0, 255, 0);
-        //     System.out.println(xPos);
-        //     System.out.println(yPos);
-        //     rect(xPos, yPos, CELLSIZE, CELLSIZE);
-        // }
+        if (choosingPiece == false && selectedPiece.getColour() == "white"){
+            fill(105, 138, 76);
+            rect(selectedPiece.getX(), selectedPiece.getY(), CELLSIZE, CELLSIZE);
+        }
 
         // drawing pieces to board
         for(int i = 0; i < 14; i++){
