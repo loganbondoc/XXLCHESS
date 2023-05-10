@@ -1,21 +1,21 @@
-package XXLChess;
+// package XXLChess;
 
-import java.util.Scanner;
-import java.util.ArrayList;
-import java.io.*;
-import processing.core.PApplet;
+// import java.util.Scanner;
+// import java.util.ArrayList;
+// import java.io.*;
+// import processing.core.PApplet;
 
-public class Board{
+// public class Board{
 
-    public ArrayList<ArrayList<Piece>> boardArray;
-    public String black;
-    public String white;
-    public Rook bRook;
-    public Rook wRook;
+//     public ArrayList<ArrayList<Piece>> boardArray;
+//     public String black;
+//     public String white;
+//     public Rook bRook;
+//     public Rook wRook;
 
-    public Board(){
-        this.boardArray = boardArray;
-    }
+//     public Board(){
+//         this.boardArray = boardArray;
+//     }
 
     // public void makeBoard(){
     //     try {
@@ -79,45 +79,5 @@ public class Board{
     // public void displayPieces() {
         
     // }
-}
+// }
 
-// case "N":
-//     Piece bKnight = new Knight(black);
-// case "n":
-//     Piece wKnight = new Knight(white);
-// case "B":
-//     Piece bBishop = new Bishop(black);
-// case "b":
-//     Piece wBishop = new Bishop(white);
-// case "H":
-//     Piece bArchbishop = new Archbishop(black);
-// case "h":
-//     Piece wArchbishop = new Archbishop(white);
-// case "C":
-//     Piece bCamel = new Camel(black);
-// case "c":
-//     Piece wCamel = new Camel(white);
-// case "G":
-//     Piece bGuard = new Guard(black);
-// case "g":
-//     Piece wGuard = new Guard(white);
-// case "A":
-//     Piece bAmazon = new Amazon(black);
-// case "a":
-//     Piece wAmazon = new Amazon(white);
-// case "K":
-//     Piece bKing = new King(black);
-// case "k":
-//     Piece wKing = new King(white);
-// case "E":
-//     Piece bEmperor = new Emperor(black);
-// case "e":
-//     Piece wEmperor = new Emperor(white);
-// case "Q":
-//     Piece bQueen = new Queen(black);
-// case "q":
-//     Piece wQueen = new Queen(white);
-// case "P":
-//     Piece bPawn = new Pawn(black);
-// case "p":
-//     Piece wPawn = new Pawn(white);

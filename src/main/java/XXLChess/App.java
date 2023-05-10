@@ -35,11 +35,8 @@ public class App extends PApplet {
     public boolean choosingPiece = true;
     public Piece selectedPiece;
     public boolean yourTurn = true;
-    // public int xPos;
-    // public int yPos;
-
-    // App happens before main
     
+    // App happens before main
     public App() {
         this.configPath = "config.json";
     }
@@ -56,6 +53,7 @@ public class App extends PApplet {
     */
     public void setup() {
         frameRate(FPS);
+        
         // building the board based on "level1.txt"
         try {
             // int success = 0;
@@ -101,12 +99,50 @@ public class App extends PApplet {
                                 boardRow.add(null);
                                 System.out.println("added empty piece");
                                 break;
+                            // case "N":
+                            //     Piece bKnight = new Knight(black);
+                            // case "n":
+                            //     Piece wKnight = new Knight(white);
+                            // case "B":
+                            //     Piece bBishop = new Bishop(black);
+                            // case "b":
+                            //     Piece wBishop = new Bishop(white);
+                            // case "H":
+                            //     Piece bArchbishop = new Archbishop(black);
+                            // case "h":
+                            //     Piece wArchbishop = new Archbishop(white);
+                            // case "C":
+                            //     Piece bCamel = new Camel(black);
+                            // case "c":
+                            //     Piece wCamel = new Camel(white);
+                            // case "G":
+                            //     Piece bGuard = new Guard(black);
+                            // case "g":
+                            //     Piece wGuard = new Guard(white);
+                            // case "A":
+                            //     Piece bAmazon = new Amazon(black);
+                            // case "a":
+                            //     Piece wAmazon = new Amazon(white);
+                            // case "K":
+                            //     Piece bKing = new King(black);
+                            // case "k":
+                            //     Piece wKing = new King(white);
+                            // case "E":
+                            //     Piece bEmperor = new Emperor(black);
+                            // case "e":
+                            //     Piece wEmperor = new Emperor(white);
+                            // case "Q":
+                            //     Piece bQueen = new Queen(black);
+                            // case "q":
+                            //     Piece wQueen = new Queen(white);
+                            // case "P":
+                            //     Piece bPawn = new Pawn(black);
+                            // case "p":
+                            //     Piece wPawn = new Pawn(white);
                         }
                 }
-                // pieceNum++;
                 boardArray.add(boardRow);
                 System.out.println("onto the next part!");
-                // success++;
                 System.out.println(boardRow);
                 System.out.println(boardRow.size());
             }
@@ -115,25 +151,6 @@ public class App extends PApplet {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-
-
-
-        // // Load images during setup
-        
-        // for(int i = 0; i < 14; i++){
-        //     for(int j = 0; j < 14; j++){
-        //         Piece piece = board.boardArray.get(i).get(j);
-        //         System.out.println(piece.getClass());
-        //         // switch(piece.getClass()){
-        //         //     case("class Rook"):
-        //         //         this.piece.setSprite(this.loadImage("src/main/resources/XXLChess/"+"b-rook.png"));
-        //         //         break;
-        //         // }
-        //     }
-        // }
-        
-        
-        // PImage spr = loadImage("src/main/resources/XXLChess/"+"b-rook.png")
 
 		// load config
         JSONObject conf = loadJSONObject(new File(this.configPath));
@@ -174,29 +191,41 @@ public class App extends PApplet {
             
             // if they selected an empty tile
             if (boardArray.get(yPos).get(xPos) == null){
-                // replace selectedPiece with null and move to new spot in boardArray
-                boardArray.get(oldSpotY).set(oldSpotX, null);
-                boardArray.get(yPos).set(xPos, selectedPiece);
                 
-                System.out.println((oldSpotX + 1) + "," + (oldSpotY + 1) + " is now null");
-                System.out.println(selectedPiece + "is now at " + (xPos + 1) + "," + (yPos + 1));
+                // check if any piece is in the way
+                if(selectedPiece.isValidMove(xPos, yPos, boardArray) == true){
+                    // replace selectedPiece with null and move to new spot in boardArray
+                    boardArray.get(oldSpotY).set(oldSpotX, null);
+                    boardArray.get(yPos).set(xPos, selectedPiece);
+                    
+                    System.out.println((oldSpotX + 1) + "," + (oldSpotY + 1) + " is now null");
+                    System.out.println(selectedPiece + "is now at " + (xPos + 1) + "," + (yPos + 1));
 
-                //set new coords
-                selectedPiece.setX(xPos * CELLSIZE);
-                selectedPiece.setY(yPos * CELLSIZE);
-                System.out.println("was moved!");
-                choosingPiece = true;
-
+                    //set new coords
+                    selectedPiece.setX(xPos * CELLSIZE);
+                    selectedPiece.setY(yPos * CELLSIZE);
+                    System.out.println("was moved!");
+                    choosingPiece = true;
+                    selectedPiece = null;
+                
+                } else {
+                    System.out.println("doesnt work :(");
+                    choosingPiece = true;
+                    selectedPiece = null;
+                }
+                
             // if they selected a tile that another piece is on
             // if its your piece, cannot move
             } else if (selectedPiece.getColour() == "white"){
                 System.out.println("ur blocked");
                 choosingPiece = true;
+                selectedPiece = null;
 
             // if its their piece... KILL
             } else if (selectedPiece.getColour() == "black"){
                 System.out.println("KILL");
                 choosingPiece = true;
+                selectedPiece = null;
 
             } else {
                 System.out.println("HOW DID YOU EVEN GET HERE");
@@ -213,26 +242,16 @@ public class App extends PApplet {
             
             // if you choose a tile with your thing on it
             } else if(selectedPiece.getColour() == "white") {
-                // figure out how to colour tile green
                 System.out.println("piece was chosen");
                 choosingPiece = false;
             
             // if you choose a tile with someone elses piece on it
             } else {
                 choosingPiece = true;
+                selectedPiece = null;
                 System.out.println("not ur piece");
             }
         }
-
-
-
-
-        // find mouse coordinates of where clicked happened
-            // click that same piece again and it'll cancel
-        // need to average it out between a certain coordinate
-        // take the piece that was clicked
-            // if there is no piece that was clicked change boolean do nothing
-
     }
 
     @Override
@@ -268,11 +287,23 @@ public class App extends PApplet {
             }
         }
         
-        // drawing green rect of selected piece
+        // piece highlights
         if (choosingPiece == false && selectedPiece.getColour() == "white"){
+            // of selected piece, check on board all available moves
+            for (int i = 0; i < 14; i++){
+                for (int j = 0; j < 14; j++){
+                    if(selectedPiece.isValidMove(i, j, boardArray) == true){
+                        fill(137, 207, 240, 155);
+                        rect(i * CELLSIZE, j * CELLSIZE, CELLSIZE, CELLSIZE);
+                    } 
+                }
+            }
+            // drawing green rect of selected piece
             fill(105, 138, 76);
             rect(selectedPiece.getX(), selectedPiece.getY(), CELLSIZE, CELLSIZE);
         }
+
+
 
         // drawing pieces to board
         for(int i = 0; i < 14; i++){
@@ -286,8 +317,6 @@ public class App extends PApplet {
             }
         }
     }
-	
-	// Add any additional methods or attributes you want. Please put classes in different files.
 
     public static void main(String[] args) {
         PApplet.main("XXLChess.App");
