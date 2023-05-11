@@ -119,14 +119,47 @@ public class App extends PApplet {
                                 boardRow.add(wBishop);
                                 System.out.println("added white bishop");
                                 break;
+                            case 'Q': // Black Queen
+                                Piece bQueen = new Queen("black", (x * CELLSIZE), (y * CELLSIZE));
+                                bQueen.setSprite(loadImage("src/main/resources/XXLChess/b-queen.png"));
+                                boardRow.add(bQueen);
+                                System.out.println("added black queen");
+                                break;
+                            case 'q': // White Queen
+                                Piece wQueen = new Queen("white", (x * CELLSIZE), (y * CELLSIZE));
+                                wQueen.setSprite(loadImage("src/main/resources/XXLChess/w-queen.png"));
+                                boardRow.add(wQueen);
+                                System.out.println("added white queen");
+                                break;
+                            case 'N': // Black Knight
+                                Piece bKnight = new Knight("black", (x * CELLSIZE), (y * CELLSIZE));
+                                bKnight.setSprite(loadImage("src/main/resources/XXLChess/b-knight.png"));
+                                boardRow.add(bKnight);
+                                System.out.println("added black knight");
+                                break;
+                            case 'n': // White Knight
+                                Piece wKnight = new Knight("white", (x * CELLSIZE), (y * CELLSIZE));
+                                wKnight.setSprite(loadImage("src/main/resources/XXLChess/w-knight.png"));
+                                boardRow.add(wKnight);
+                                System.out.println("added white knight");
+                                break;
+                            case 'H': // Black Archbishop
+                                Piece bArchbishop = new Archbishop("black", (x * CELLSIZE), (y * CELLSIZE));
+                                bArchbishop.setSprite(loadImage("src/main/resources/XXLChess/b-archbishop.png"));
+                                boardRow.add(bArchbishop);
+                                System.out.println("added black archbishop");
+                                break;
+                            case 'h': // White Archbishop
+                                Piece wArchbishop = new Archbishop("white", (x * CELLSIZE), (y * CELLSIZE));
+                                wArchbishop.setSprite(loadImage("src/main/resources/XXLChess/w-archbishop.png"));
+                                boardRow.add(wArchbishop);
+                                System.out.println("added white archbishop");
+                                break;
                             default:
                                 boardRow.add(null);
                                 System.out.println("added empty piece");
                                 break;
-                            // case "N":
-                            //     Piece bKnight = new Knight(black);
-                            // case "n":
-                            //     Piece wKnight = new Knight(white);
+                            
                             // case "H":
                             //     Piece bArchbishop = new Archbishop(black);
                             // case "h":
@@ -151,10 +184,6 @@ public class App extends PApplet {
                             //     Piece bEmperor = new Emperor(black);
                             // case "e":
                             //     Piece wEmperor = new Emperor(white);
-                            // case "Q":
-                            //     Piece bQueen = new Queen(black);
-                            // case "q":
-                            //     Piece wQueen = new Queen(white);
                         }
                 }
                 boardArray.add(boardRow);

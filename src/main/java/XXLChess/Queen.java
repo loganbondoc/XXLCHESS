@@ -12,10 +12,10 @@ import java.awt.Font;
 import java.io.*;
 import java.util.*;
 
-public class Rook extends Piece implements RookMovement {
+public class Queen extends Piece implements RookMovement, BishopMovement{
     
-    public Rook(String colour, int x, int y){
-        super(colour, x, y, 5.25);
+    public Queen(String colour, int x, int y){
+        super(colour, x, y, 9.5);
     }
 
     public void tick(){
@@ -23,6 +23,12 @@ public class Rook extends Piece implements RookMovement {
     }
 
     public boolean isValidMove(int xPos, int yPos, ArrayList<ArrayList<Piece>> boardArray){
-        return isValidRookMove(xPos, yPos, boardArray, x, y);
+        if (isValidRookMove(xPos, yPos, boardArray, x, y) == true){
+            return true;
+        } else if (isValidBishopMove(xPos, yPos, boardArray, x, y) == true){
+            return true;
+        } else {
+            return false;
+        }
     }
 }

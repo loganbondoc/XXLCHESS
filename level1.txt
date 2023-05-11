@@ -1,6 +1,6 @@
 RRRRRRRRRRRRRR
-PPPPPPPPPPPPPP
-B            B
+PPPBPNHPPBPPPP
+Q            Q
 
 
 
@@ -9,6 +9,6 @@ B            B
 
 
 
-b            b
-ppp pppp ppppp
+q            q
+ppbnphphnbpppp
 rrrrrrrrrrrrrr
