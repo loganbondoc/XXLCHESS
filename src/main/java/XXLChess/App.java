@@ -83,29 +83,41 @@ public class App extends PApplet {
                     char c = s.charAt(x);
                         // initiates new pieces, assigns sprites to each piece and adds them to array
                         switch (c){
-                            case 'R':
+                            case 'R': // Black Rook
                                 Piece bRook = new Rook("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bRook.setSprite(loadImage("src/main/resources/XXLChess/b-rook.png"));
                                 boardRow.add(bRook);
                                 System.out.println("added black rook");
                                 break;
-                            case 'r':
+                            case 'r': // White Rook
                                 Piece wRook = new Rook("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wRook.setSprite(loadImage("src/main/resources/XXLChess/w-rook.png"));
                                 boardRow.add(wRook);
                                 System.out.println("added white rook");
                                 break;
-                            case 'P':
+                            case 'P': // Black Pawn
                                 Piece bPawn = new Pawn("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bPawn.setSprite(loadImage("src/main/resources/XXLChess/b-pawn.png"));
                                 boardRow.add(bPawn);
                                 System.out.println("added black pawn");
                                 break;
-                            case 'p':
+                            case 'p': // White Pawn
                                 Piece wPawn = new Pawn("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wPawn.setSprite(loadImage("src/main/resources/XXLChess/w-pawn.png"));
                                 boardRow.add(wPawn);
                                 System.out.println("added white pawn");
+                                break;
+                            case 'B': // Black Bishop
+                                Piece bBishop = new Bishop("black", (x * CELLSIZE), (y * CELLSIZE));
+                                bBishop.setSprite(loadImage("src/main/resources/XXLChess/b-bishop.png"));
+                                boardRow.add(bBishop);
+                                System.out.println("added black bishop");
+                                break;
+                            case 'b': // White Bishop
+                                Piece wBishop = new Bishop("white", (x * CELLSIZE), (y * CELLSIZE));
+                                wBishop.setSprite(loadImage("src/main/resources/XXLChess/w-bishop.png"));
+                                boardRow.add(wBishop);
+                                System.out.println("added white bishop");
                                 break;
                             default:
                                 boardRow.add(null);
@@ -115,10 +127,6 @@ public class App extends PApplet {
                             //     Piece bKnight = new Knight(black);
                             // case "n":
                             //     Piece wKnight = new Knight(white);
-                            // case "B":
-                            //     Piece bBishop = new Bishop(black);
-                            // case "b":
-                            //     Piece wBishop = new Bishop(white);
                             // case "H":
                             //     Piece bArchbishop = new Archbishop(black);
                             // case "h":
