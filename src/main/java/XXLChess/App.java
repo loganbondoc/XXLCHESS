@@ -155,15 +155,36 @@ public class App extends PApplet {
                                 boardRow.add(wArchbishop);
                                 System.out.println("added white archbishop");
                                 break;
+                            case 'A': // Black Amazon
+                                Piece bAmazon = new Amazon("black", (x * CELLSIZE), (y * CELLSIZE));
+                                bAmazon.setSprite(loadImage("src/main/resources/XXLChess/b-amazon.png"));
+                                boardRow.add(bAmazon);
+                                System.out.println("added black amazon");
+                                break;
+                            case 'a': // White Amazon
+                                Piece wAmazon = new Amazon("white", (x * CELLSIZE), (y * CELLSIZE));
+                                wAmazon.setSprite(loadImage("src/main/resources/XXLChess/w-amazon.png"));
+                                boardRow.add(wAmazon);
+                                System.out.println("added white amazon");
+                                break;
+                            case 'E': // Black Chancellor
+                                Piece bChancellor = new Chancellor("black", (x * CELLSIZE), (y * CELLSIZE));
+                                bChancellor.setSprite(loadImage("src/main/resources/XXLChess/b-chancellor.png"));
+                                boardRow.add(bChancellor);
+                                System.out.println("added black chancellor");
+                                break;
+                            case 'e': // White Chancellor
+                                Piece wChancellor = new Chancellor("white", (x * CELLSIZE), (y * CELLSIZE));
+                                wChancellor.setSprite(loadImage("src/main/resources/XXLChess/w-chancellor.png"));
+                                boardRow.add(wChancellor);
+                                System.out.println("added white chancellor");
+                                break;
                             default:
                                 boardRow.add(null);
                                 System.out.println("added empty piece");
                                 break;
                             
-                            // case "H":
-                            //     Piece bArchbishop = new Archbishop(black);
-                            // case "h":
-                            //     Piece wArchbishop = new Archbishop(white);
+            
                             // case "C":
                             //     Piece bCamel = new Camel(black);
                             // case "c":
@@ -172,10 +193,6 @@ public class App extends PApplet {
                             //     Piece bGuard = new Guard(black);
                             // case "g":
                             //     Piece wGuard = new Guard(white);
-                            // case "A":
-                            //     Piece bAmazon = new Amazon(black);
-                            // case "a":
-                            //     Piece wAmazon = new Amazon(white);
                             // case "K":
                             //     Piece bKing = new King(black);
                             // case "k":

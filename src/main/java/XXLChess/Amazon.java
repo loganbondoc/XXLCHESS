@@ -12,10 +12,10 @@ import java.awt.Font;
 import java.io.*;
 import java.util.*;
 
-public class Archbishop extends Piece implements BishopMovement, KnightMovement{
+public class Amazon extends Piece implements RookMovement, BishopMovement, KnightMovement{
     
-    public Archbishop(String colour, int x, int y){
-        super(colour, x, y, 7.5);
+    public Amazon(String colour, int x, int y){
+        super(colour, x, y, 9.5);
     }
 
     public void tick(){
@@ -23,7 +23,9 @@ public class Archbishop extends Piece implements BishopMovement, KnightMovement{
     }
 
     public boolean isValidMove(int xPos, int yPos, ArrayList<ArrayList<Piece>> boardArray){
-        if (isValidBishopMove(xPos, yPos, boardArray, x, y) == true){
+        if (isValidRookMove(xPos, yPos, boardArray, x, y) == true){
+            return true;
+        } else if (isValidBishopMove(xPos, yPos, boardArray, x, y) == true){
             return true;
         } else if (isValidKnightMove(xPos, yPos, boardArray, x, y) == true){
             return true;

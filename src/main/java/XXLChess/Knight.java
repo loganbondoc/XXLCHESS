@@ -12,7 +12,7 @@ import java.awt.Font;
 import java.io.*;
 import java.util.*;
 
-public class Knight extends Piece {
+public class Knight extends Piece implements KnightMovement{
     
     public Knight(String colour, int x, int y){
         super(colour, x, y, 2);
@@ -23,21 +23,6 @@ public class Knight extends Piece {
     }
 
     public boolean isValidMove(int xPos, int yPos, ArrayList<ArrayList<Piece>> boardArray){
-        
-        int xCell = x / 48;
-        int yCell = y / 48;
-
-        int xDistance = Math.abs(xPos - xCell);
-        int yDistance =  Math.abs(yPos - yCell);
-
-        // move must have an xDistance of 2 and yDistance of 1 or vice versa
-        if (xDistance == 2 && yDistance == 1) {
-            // System.out.println("not it chief");
-            return true;
-        } else if (xDistance == 1 && yDistance == 2) {
-            return true;
-        } else {
-            return false;
-        }
+        return isValidKnightMove(xPos, yPos, boardArray, x, y);
     }
 }
