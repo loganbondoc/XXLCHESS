@@ -95,6 +95,18 @@ public class App extends PApplet {
                                 boardRow.add(wRook);
                                 System.out.println("added white rook");
                                 break;
+                            case 'P':
+                                Piece bPawn = new Pawn("black", (x * CELLSIZE), (y * CELLSIZE));
+                                bPawn.setSprite(loadImage("src/main/resources/XXLChess/b-pawn.png"));
+                                boardRow.add(bPawn);
+                                System.out.println("added black pawn");
+                                break;
+                            case 'p':
+                                Piece wPawn = new Pawn("white", (x * CELLSIZE), (y * CELLSIZE));
+                                wPawn.setSprite(loadImage("src/main/resources/XXLChess/w-pawn.png"));
+                                boardRow.add(wPawn);
+                                System.out.println("added white pawn");
+                                break;
                             default:
                                 boardRow.add(null);
                                 System.out.println("added empty piece");
@@ -135,10 +147,6 @@ public class App extends PApplet {
                             //     Piece bQueen = new Queen(black);
                             // case "q":
                             //     Piece wQueen = new Queen(white);
-                            // case "P":
-                            //     Piece bPawn = new Pawn(black);
-                            // case "p":
-                            //     Piece wPawn = new Pawn(white);
                         }
                 }
                 boardArray.add(boardRow);
@@ -188,6 +196,7 @@ public class App extends PApplet {
             System.out.println("moving a piece");
             int oldSpotX = (selectedPiece.getX()/CELLSIZE);
             int oldSpotY = (selectedPiece.getY()/CELLSIZE);
+            Piece newSelect = boardArray.get(yPos).get(xPos);
             
             // if they selected an empty tile
             if (boardArray.get(yPos).get(xPos) == null){
@@ -205,6 +214,7 @@ public class App extends PApplet {
                     selectedPiece.setX(xPos * CELLSIZE);
                     selectedPiece.setY(yPos * CELLSIZE);
                     System.out.println("was moved!");
+                    selectedPiece.setFirstMove(false);
                     choosingPiece = true;
                     selectedPiece = null;
                 
@@ -216,14 +226,28 @@ public class App extends PApplet {
                 
             // if they selected a tile that another piece is on
             // if its your piece, cannot move
-            } else if (selectedPiece.getColour() == "white"){
+            } else if (newSelect.getColour() == "white"){
                 System.out.println("ur blocked");
                 choosingPiece = true;
                 selectedPiece = null;
 
             // if its their piece... KILL
-            } else if (selectedPiece.getColour() == "black"){
+            } else if (newSelect.getColour() == "black"){
                 System.out.println("KILL");
+                if(selectedPiece.isValidMove(xPos, yPos, boardArray) == true){
+                    // replace selectedPiece with null and move to new spot in boardArray
+                    boardArray.get(oldSpotY).set(oldSpotX, null);
+                    boardArray.get(yPos).set(xPos, selectedPiece);
+                    
+                    System.out.println((oldSpotX + 1) + "," + (oldSpotY + 1) + " is now null");
+                    System.out.println(selectedPiece + "is now at " + (xPos + 1) + "," + (yPos + 1));
+
+                    //set new coords
+                    selectedPiece.setX(xPos * CELLSIZE);
+                    selectedPiece.setY(yPos * CELLSIZE);
+                    System.out.println("was moved!");
+                }
+                selectedPiece.setFirstMove(false);
                 choosingPiece = true;
                 selectedPiece = null;
 
@@ -292,9 +316,24 @@ public class App extends PApplet {
             // of selected piece, check on board all available moves
             for (int i = 0; i < 14; i++){
                 for (int j = 0; j < 14; j++){
-                    if(selectedPiece.isValidMove(i, j, boardArray) == true){
-                        fill(137, 207, 240, 155);
-                        rect(i * CELLSIZE, j * CELLSIZE, CELLSIZE, CELLSIZE);
+                    if(selectedPiece.isValidMove(j, i, boardArray) == true){ 
+                        
+                        // if its empty make it blue
+                        if (boardArray.get(i).get(j) == null){
+                            fill(137, 207, 240, 155);
+                            rect(j * CELLSIZE, i * CELLSIZE, CELLSIZE, CELLSIZE);
+                        }
+                        
+                        // if piece is white dont fill
+                        if (boardArray.get(i).get(j) != null && boardArray.get(i).get(j).getColour() == "white"){
+                            continue;
+                        }
+        
+                        // // if piece is black fill red
+                        if (boardArray.get(i).get(j) != null && boardArray.get(i).get(j).getColour() == "black"){
+                            fill(215, 0, 0, 90);
+                            rect(j * CELLSIZE, i * CELLSIZE, CELLSIZE, CELLSIZE);
+                        } 
                     } 
                 }
             }

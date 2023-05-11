@@ -18,6 +18,7 @@ public abstract class Piece {
     private String colour;
     private PImage sprite;
     private double value;
+    private boolean firstMove = true;
     protected int x;
     protected int y;
 
@@ -28,7 +29,7 @@ public abstract class Piece {
         this.value = value;
     }
 
-    // setter
+    // setters
     public void setX(int x){
         this.x = x;
     }
@@ -36,9 +37,12 @@ public abstract class Piece {
     public void setY(int y){
         this.y = y;
     }
-    
 
-    // getter
+    public void setFirstMove(boolean firstMove){
+        this.firstMove = firstMove;
+    }
+
+    // getters
     public String getColour(){
         return this.colour;
     }
@@ -53,6 +57,10 @@ public abstract class Piece {
 
     public double getValue(){
         return this.value;
+    }
+
+    public boolean getFirstMove(){
+        return this.firstMove;
     }
 
 
