@@ -29,11 +29,19 @@ public class App extends PApplet {
 	
     public String configPath;
 
-    public ArrayList<ArrayList<Piece>> boardArray; 
+    // Arrays for storing last moves {oldX, oldY, newX, newY}
+    public int[] lastMoves = new int[4];
+    public boolean firstMove = true;
+
+    // nested ArrayList for 2D board
+    public ArrayList<ArrayList<Piece>> boardArray;
 
     // boolean for if your choosing a piece to move or if you are moving a piece
     public boolean choosingPiece = true;
+
     public Piece selectedPiece;
+
+    // boolean for whose turn it is
     public boolean yourTurn = true;
     
     // App happens before main
@@ -241,7 +249,7 @@ public class App extends PApplet {
      * Receive key pressed signal from the keyboard.
     */
     public void keyPressed(){
-
+        
     }
     
     /**
@@ -282,6 +290,14 @@ public class App extends PApplet {
                     System.out.println((oldSpotX + 1) + "," + (oldSpotY + 1) + " is now null");
                     System.out.println(selectedPiece + "is now at " + (xPos + 1) + "," + (yPos + 1));
 
+
+                    // set coords for highlighs
+                    lastMoves[0] = oldSpotX * 48;
+                    lastMoves[1] = oldSpotY * 48;
+                    lastMoves[2] = xPos * 48;
+                    lastMoves[3] = yPos * 48;
+
+
                     //set new coords
                     selectedPiece.setX(xPos * CELLSIZE);
                     selectedPiece.setY(yPos * CELLSIZE);
@@ -289,6 +305,7 @@ public class App extends PApplet {
                     selectedPiece.setFirstMove(false);
                     choosingPiece = true;
                     selectedPiece = null;
+                    firstMove = false;
                 
                 } else {
                     System.out.println("doesnt work :(");
@@ -314,6 +331,12 @@ public class App extends PApplet {
                     System.out.println((oldSpotX + 1) + "," + (oldSpotY + 1) + " is now null");
                     System.out.println(selectedPiece + "is now at " + (xPos + 1) + "," + (yPos + 1));
 
+                    // set coords for highlighs
+                    lastMoves[0] = oldSpotX * 48;
+                    lastMoves[1] = oldSpotY * 48;
+                    lastMoves[2] = xPos * 48;
+                    lastMoves[3] = yPos * 48;
+
                     //set new coords
                     selectedPiece.setX(xPos * CELLSIZE);
                     selectedPiece.setY(yPos * CELLSIZE);
@@ -322,6 +345,7 @@ public class App extends PApplet {
                 selectedPiece.setFirstMove(false);
                 choosingPiece = true;
                 selectedPiece = null;
+                firstMove = false;
 
             } else {
                 System.out.println("HOW DID YOU EVEN GET HERE");
@@ -382,7 +406,14 @@ public class App extends PApplet {
                 white = false; 
             }
         }
-        
+
+        // last move highlight
+        if (firstMove == false){
+            fill(170, 162, 58);
+            rect(lastMoves[0], lastMoves[1], CELLSIZE, CELLSIZE);
+            rect(lastMoves[2], lastMoves[3], CELLSIZE, CELLSIZE);
+        }
+
         // piece highlights
         if (choosingPiece == false && selectedPiece.getColour() == "white"){
             // of selected piece, check on board all available moves
@@ -413,8 +444,6 @@ public class App extends PApplet {
             fill(105, 138, 76);
             rect(selectedPiece.getX(), selectedPiece.getY(), CELLSIZE, CELLSIZE);
         }
-
-
 
         // drawing pieces to board
         for(int i = 0; i < 14; i++){
