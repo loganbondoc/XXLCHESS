@@ -179,16 +179,22 @@ public class App extends PApplet {
                                 boardRow.add(wChancellor);
                                 System.out.println("added white chancellor");
                                 break;
+                            case 'C': // Black Camel
+                                Piece bCamel = new Camel("black", (x * CELLSIZE), (y * CELLSIZE));
+                                bCamel.setSprite(loadImage("src/main/resources/XXLChess/b-camel.png"));
+                                boardRow.add(bCamel);
+                                System.out.println("added black camel");
+                                break;
+                            case 'c': // White Camel
+                                Piece wCamel = new Camel("white", (x * CELLSIZE), (y * CELLSIZE));
+                                wCamel.setSprite(loadImage("src/main/resources/XXLChess/w-camel.png"));
+                                boardRow.add(wCamel);
+                                System.out.println("added white camel");
+                                break;
                             default:
                                 boardRow.add(null);
                                 System.out.println("added empty piece");
                                 break;
-                            
-            
-                            // case "C":
-                            //     Piece bCamel = new Camel(black);
-                            // case "c":
-                            //     Piece wCamel = new Camel(white);
                             // case "G":
                             //     Piece bGuard = new Guard(black);
                             // case "g":
@@ -197,10 +203,6 @@ public class App extends PApplet {
                             //     Piece bKing = new King(black);
                             // case "k":
                             //     Piece wKing = new King(white);
-                            // case "E":
-                            //     Piece bEmperor = new Emperor(black);
-                            // case "e":
-                            //     Piece wEmperor = new Emperor(white);
                         }
                 }
                 boardArray.add(boardRow);
