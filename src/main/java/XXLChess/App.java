@@ -191,18 +191,34 @@ public class App extends PApplet {
                                 boardRow.add(wCamel);
                                 System.out.println("added white camel");
                                 break;
-                            default:
+                            case 'K': // Black King
+                                Piece bKing = new King("black", (x * CELLSIZE), (y * CELLSIZE));
+                                bKing.setSprite(loadImage("src/main/resources/XXLChess/b-king.png"));
+                                boardRow.add(bKing);
+                                System.out.println("added black king");
+                                break;
+                            case 'k': // White King
+                                Piece wKing = new King("white", (x * CELLSIZE), (y * CELLSIZE));
+                                wKing.setSprite(loadImage("src/main/resources/XXLChess/w-king.png"));
+                                boardRow.add(wKing);
+                                System.out.println("added white king");
+                                break;
+                            case 'G': // Black Guard
+                                Piece bGuard = new Guard("black", (x * CELLSIZE), (y * CELLSIZE));
+                                bGuard.setSprite(loadImage("src/main/resources/XXLChess/b-knight-king.png"));
+                                boardRow.add(bGuard);
+                                System.out.println("added black guard");
+                                break;
+                            case 'g': // White Guard
+                                Piece wGuard = new Guard("white", (x * CELLSIZE), (y * CELLSIZE));
+                                wGuard.setSprite(loadImage("src/main/resources/XXLChess/w-knight-king.png"));
+                                boardRow.add(wGuard);
+                                System.out.println("added white guard");
+                                break;
+                            default: // empty cell
                                 boardRow.add(null);
                                 System.out.println("added empty piece");
                                 break;
-                            // case "G":
-                            //     Piece bGuard = new Guard(black);
-                            // case "g":
-                            //     Piece wGuard = new Guard(white);
-                            // case "K":
-                            //     Piece bKing = new King(black);
-                            // case "k":
-                            //     Piece wKing = new King(white);
                         }
                 }
                 boardArray.add(boardRow);
