@@ -27,8 +27,15 @@ public class Pawn extends Piece {
         int yCell = y / 48;
         Piece targetSpot = boardArray.get(yPos).get(xPos);
 
+        int direction = 0;
+        if (this.getColour() == "white"){
+            direction = -1;
+        } else if (this.getColour() == "black"){
+            direction = 1;
+        }
+
         // if first move can move two ahead
-        if (getFirstMove() == true && yPos == (yCell - 2) && xCell == xPos){
+        if (getFirstMove() == true && yPos == (yCell + (2 * direction)) && xCell == xPos){
             // Check if any pieces between move and current location
             int tempX = Integer.signum(xPos - xCell);
             int tempY = Integer.signum(yPos - yCell);
@@ -45,17 +52,17 @@ public class Pawn extends Piece {
             return true;
 
         // Check that move is directly one ahead
-        } else if ((yCell - 1) == yPos && xCell == xPos && targetSpot == null) {
+        } else if ((yCell + direction) == yPos && xCell == xPos && targetSpot == null) {
             return true;
 
         // if piece is diagonal right can kill
-        } else if (yPos == (yCell - 1) && xPos == (xCell + 1) && targetSpot != null && targetSpot.getColour() == "black"){
+        } else if (yPos == (yCell + direction) && xPos == (xCell + 1) && targetSpot != null && targetSpot.getColour() != this.getColour()){
             return true;
-        
+
         // if piece is diagonal left can kill
-        } else if (yPos == (yCell - 1) && xPos == (xCell - 1) && targetSpot != null && targetSpot.getColour() == "black"){
+        } else if (yPos == (yCell + direction) && xPos == (xCell - 1) && targetSpot != null && targetSpot.getColour() != this.getColour()){
             return true;
-        
+            
         } else {
             return false;
         }

@@ -30,19 +30,31 @@ public class App extends PApplet {
     public String configPath;
 
     // Arrays for storing last moves {oldX, oldY, newX, newY}
-    public int[] lastMoves = new int[4];
-    public boolean firstMove = true;
-
+    public static int[] lastMoves = new int[4];
+    public static boolean firstMove = true;
     // nested ArrayList for 2D board
-    public ArrayList<ArrayList<Piece>> boardArray;
-
+    public static ArrayList<ArrayList<Piece>> boardArray;
     // boolean for if your choosing a piece to move or if you are moving a piece
-    public boolean choosingPiece = true;
-
-    public Piece selectedPiece;
+    public static boolean choosingPiece = true;
+    public static Piece selectedPiece;
 
     // boolean for whose turn it is
-    public boolean yourTurn = true;
+    public static boolean yourTurn = true;
+    public static boolean checkmated = false;
+    public static King bKing;
+    public static King wKing;
+    public static Opponent opponent;
+
+    // timers for players and increments
+    public int wTotalTime;
+    public int bTotalTime;
+    public int wRemainingTime;
+    public int bRemainingTime;
+    public int wElapsedTime;
+    public int bElapsedTime;
+    public int wIncrement;
+    public int bIncrement;
+
     
     // App happens before main
     public App() {
@@ -200,13 +212,13 @@ public class App extends PApplet {
                                 System.out.println("added white camel");
                                 break;
                             case 'K': // Black King
-                                Piece bKing = new King("black", (x * CELLSIZE), (y * CELLSIZE));
+                                bKing = new King("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bKing.setSprite(loadImage("src/main/resources/XXLChess/b-king.png"));
                                 boardRow.add(bKing);
                                 System.out.println("added black king");
                                 break;
                             case 'k': // White King
-                                Piece wKing = new King("white", (x * CELLSIZE), (y * CELLSIZE));
+                                wKing = new King("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wKing.setSprite(loadImage("src/main/resources/XXLChess/w-king.png"));
                                 boardRow.add(wKing);
                                 System.out.println("added white king");
@@ -242,14 +254,23 @@ public class App extends PApplet {
 
 		// load config
         JSONObject conf = loadJSONObject(new File(this.configPath));
-        
+        wTotalTime = 180;
+        bTotalTime = 180;
+        wIncrement = 2;
+        bIncrement = 2;
+
+        // initialising opponent
+        opponent = new Opponent("black", "easy");
     }
 
     /**
      * Receive key pressed signal from the keyboard.
     */
     public void keyPressed(){
-        
+        // if key == 'e'
+            // checkmated == true
+        // if checkmated == true and key == 'r'
+            // call setup again
     }
     
     /**
@@ -262,114 +283,152 @@ public class App extends PApplet {
     @Override
     public void mousePressed(MouseEvent e) {
         
-        System.out.println("Real mouse position is" + (mouseX) + " , " + (mouseY));
-        int xPos = mouseX / CELLSIZE;
-        int yPos = mouseY / CELLSIZE;
-       
-    
-        // Accessing selected piece
-        // indexes between the drawn boardtiles and boardArray are different, need to +1 for tile
-        System.out.println("Selected square is: " + (xPos + 1) + ", "+ (yPos + 1));
-
-        // if a piece is chosen and choosing a tile to move to
-        if (choosingPiece == false) {
-            System.out.println("moving a piece");
-            int oldSpotX = (selectedPiece.getX()/CELLSIZE);
-            int oldSpotY = (selectedPiece.getY()/CELLSIZE);
-            Piece newSelect = boardArray.get(yPos).get(xPos);
+        // ensure click is in the bounds of board
+        if (mouseX < (CELLSIZE * 14) && mouseY < (CELLSIZE * 14)){
+            System.out.println("Real mouse position is" + (mouseX) + " , " + (mouseY));
+            int xPos = mouseX / CELLSIZE;
+            int yPos = mouseY / CELLSIZE;
+        
+        
+            // Accessing selected piece
+            // indexes between the drawn boardtiles and boardArray are different, need to +1 for tile
+            System.out.println("Selected square is: " + (xPos + 1) + ", "+ (yPos + 1));
             
-            // if they selected an empty tile
-            if (boardArray.get(yPos).get(xPos) == null){
+            // if a piece is chosen and choosing a tile to move to
+            if (choosingPiece == false) {
+                System.out.println("moving a piece");
+                int oldSpotX = (selectedPiece.getX()/CELLSIZE);
+                int oldSpotY = (selectedPiece.getY()/CELLSIZE);
+                Piece newSelect = boardArray.get(yPos).get(xPos);
                 
-                // check if any piece is in the way
-                if(selectedPiece.isValidMove(xPos, yPos, boardArray) == true){
-                    // replace selectedPiece with null and move to new spot in boardArray
-                    boardArray.get(oldSpotY).set(oldSpotX, null);
-                    boardArray.get(yPos).set(xPos, selectedPiece);
+                // if they selected an empty tile
+                if (boardArray.get(yPos).get(xPos) == null){
                     
-                    System.out.println((oldSpotX + 1) + "," + (oldSpotY + 1) + " is now null");
-                    System.out.println(selectedPiece + "is now at " + (xPos + 1) + "," + (yPos + 1));
+                    // check if any piece is in the way
+                    if(selectedPiece.isValidMove(xPos, yPos, boardArray) == true){
+                        // replace selectedPiece with null and move to new spot in boardArray
+                        boardArray.get(oldSpotY).set(oldSpotX, null);
+                        boardArray.get(yPos).set(xPos, selectedPiece);
+                        
+                        System.out.println((oldSpotX + 1) + "," + (oldSpotY + 1) + " is now null");
+                        System.out.println(selectedPiece + "is now at " + (xPos + 1) + "," + (yPos + 1));
 
 
-                    // set coords for highlighs
-                    lastMoves[0] = oldSpotX * 48;
-                    lastMoves[1] = oldSpotY * 48;
-                    lastMoves[2] = xPos * 48;
-                    lastMoves[3] = yPos * 48;
+                        // set coords for highlighs
+                        lastMoves[0] = oldSpotX * 48;
+                        lastMoves[1] = oldSpotY * 48;
+                        lastMoves[2] = xPos * 48;
+                        lastMoves[3] = yPos * 48;
 
 
-                    //set new coords
-                    selectedPiece.setX(xPos * CELLSIZE);
-                    selectedPiece.setY(yPos * CELLSIZE);
-                    System.out.println("was moved!");
+                        //set new coords
+                        selectedPiece.setX(xPos * CELLSIZE);
+                        selectedPiece.setY(yPos * CELLSIZE);
+                        System.out.println("was moved!");
+                        selectedPiece.setFirstMove(false);
+                        choosingPiece = true;
+                        selectedPiece = null;
+                        firstMove = false;
+                        yourTurn = false;
+                    
+                    } else {
+                        System.out.println("doesnt work :(");
+                        choosingPiece = true;
+                        selectedPiece = null;
+                    }
+                    
+                // if they selected a tile that another piece is on
+                // if its your piece, cannot move
+                } else if (newSelect.getColour() == "white"){
+                    System.out.println("ur blocked");
+                    choosingPiece = true;
+                    selectedPiece = null;
+
+                // if its their piece... KILL
+                } else if (newSelect.getColour() == "black"){
+                    System.out.println("KILL");
+                    if(selectedPiece.isValidMove(xPos, yPos, boardArray) == true){
+                        // replace selectedPiece with null and move to new spot in boardArray
+                        boardArray.get(oldSpotY).set(oldSpotX, null);
+                        boardArray.get(yPos).set(xPos, selectedPiece);
+                        
+                        System.out.println((oldSpotX + 1) + "," + (oldSpotY + 1) + " is now null");
+                        System.out.println(selectedPiece + "is now at " + (xPos + 1) + "," + (yPos + 1));
+
+                        // set coords for highlighs
+                        lastMoves[0] = oldSpotX * 48;
+                        lastMoves[1] = oldSpotY * 48;
+                        lastMoves[2] = xPos * 48;
+                        lastMoves[3] = yPos * 48;
+
+                        //set new coords
+                        selectedPiece.setX(xPos * CELLSIZE);
+                        selectedPiece.setY(yPos * CELLSIZE);
+                        System.out.println("was moved!");
+                    }
                     selectedPiece.setFirstMove(false);
                     choosingPiece = true;
                     selectedPiece = null;
                     firstMove = false;
-                
+                    yourTurn = false;
+
                 } else {
-                    System.out.println("doesnt work :(");
-                    choosingPiece = true;
-                    selectedPiece = null;
+                    System.out.println("HOW DID YOU EVEN GET HERE");
                 }
                 
-            // if they selected a tile that another piece is on
-            // if its your piece, cannot move
-            } else if (newSelect.getColour() == "white"){
-                System.out.println("ur blocked");
-                choosingPiece = true;
-                selectedPiece = null;
-
-            // if its their piece... KILL
-            } else if (newSelect.getColour() == "black"){
-                System.out.println("KILL");
-                if(selectedPiece.isValidMove(xPos, yPos, boardArray) == true){
-                    // replace selectedPiece with null and move to new spot in boardArray
-                    boardArray.get(oldSpotY).set(oldSpotX, null);
-                    boardArray.get(yPos).set(xPos, selectedPiece);
+                // opponent makes move
+                System.out.println("making a move");
+                
+                // if its checkmate and king is under threat, CPU loses
+                if(bKing.isCheck(boardArray) == true && bKing.isCheckmate(boardArray) == true){
+                    ;
+                // if bKing cannot move anywhere but it is not under check, stalemate
+                } else if(bKing.isCheck(boardArray) == false && bKing.isCheckmate(boardArray) == true){
+                    ;
+                } else {
+                    OpponentMove move = opponent.calcMove(boardArray, bKing);
                     
-                    System.out.println((oldSpotX + 1) + "," + (oldSpotY + 1) + " is now null");
-                    System.out.println(selectedPiece + "is now at " + (xPos + 1) + "," + (yPos + 1));
+                    int oldX = (move.getPiece().getX())/CELLSIZE;
+                    int oldY = (move.getPiece().getY())/CELLSIZE;
+                    int newX = move.getX();
+                    int newY = move.getY();
+
+                    boardArray.get(oldY).set(oldX, null);
+                    boardArray.get(newY).set(newX, move.getPiece());
 
                     // set coords for highlighs
-                    lastMoves[0] = oldSpotX * 48;
-                    lastMoves[1] = oldSpotY * 48;
-                    lastMoves[2] = xPos * 48;
-                    lastMoves[3] = yPos * 48;
-
-                    //set new coords
-                    selectedPiece.setX(xPos * CELLSIZE);
-                    selectedPiece.setY(yPos * CELLSIZE);
+                    lastMoves[0] = oldX * 48;
+                    lastMoves[1] = oldY * 48;
+                    lastMoves[2] = newX * 48;
+                    lastMoves[3] = newY * 48;
+                    
+                    move.getPiece().setX(newX * CELLSIZE);
+                    move.getPiece().setY(newY * CELLSIZE);
                     System.out.println("was moved!");
+                    move.getPiece().setFirstMove(false);
+                    System.out.println("made the move");
                 }
-                selectedPiece.setFirstMove(false);
-                choosingPiece = true;
-                selectedPiece = null;
-                firstMove = false;
-
+            
+            // if choosing a piece
             } else {
-                System.out.println("HOW DID YOU EVEN GET HERE");
-            }
-        
-        // if choosing a piece
-        } else {
-            selectedPiece = boardArray.get(yPos).get(xPos);
-            System.out.println(selectedPiece);
-            
-            // if they chose an empty tile
-            if(selectedPiece == null){
-                choosingPiece = true;
-            
-            // if you choose a tile with your thing on it
-            } else if(selectedPiece.getColour() == "white") {
-                System.out.println("piece was chosen");
-                choosingPiece = false;
-            
-            // if you choose a tile with someone elses piece on it
-            } else {
-                choosingPiece = true;
-                selectedPiece = null;
-                System.out.println("not ur piece");
+                selectedPiece = boardArray.get(yPos).get(xPos);
+                System.out.println(selectedPiece);
+                
+                // if they chose an empty tile
+                if(selectedPiece == null){
+                    choosingPiece = true;
+                
+                // if you choose a tile with your thing on it
+                } else if(selectedPiece.getColour() == "white") {
+                    System.out.println("piece was chosen");
+                    choosingPiece = false;
+                
+                // if you choose a tile with someone elses piece on it
+                } else {
+                    choosingPiece = true;
+                    selectedPiece = null;
+                    System.out.println("not ur piece");
+                }
             }
         }
     }
@@ -383,7 +442,6 @@ public class App extends PApplet {
      * Draw all elements in the game by current frame. 
     */
     public void draw() {
-       
         // drawing board
         boolean white = true;
         noStroke();
@@ -432,7 +490,7 @@ public class App extends PApplet {
                             continue;
                         }
         
-                        // // if piece is black fill red
+                        // if piece is black fill red
                         if (boardArray.get(i).get(j) != null && boardArray.get(i).get(j).getColour() == "black"){
                             fill(215, 0, 0, 90);
                             rect(j * CELLSIZE, i * CELLSIZE, CELLSIZE, CELLSIZE);
@@ -456,10 +514,77 @@ public class App extends PApplet {
                 cell.draw(this);
             }
         }
+
+        // drawing timer
+        if (yourTurn == true){
+            // int currentTime = millis()/1000;
+            wRemainingTime = wTotalTime - (millis()/1000);
+        } else {
+            bRemainingTime = bTotalTime - (millis()/1000);
+        }
+        
+        // for white's timer
+        fill(255,255,255);
+        rect((BOARD_WIDTH * CELLSIZE) + 10, 576, 110, 96);
+        fill(0, 0, 0);
+        textSize(30);
+        String wTimeString = String.format("%02d:%02d", wRemainingTime / 60, wRemainingTime % 60);
+        text(wTimeString, (BOARD_WIDTH * CELLSIZE) + 10, 624);
+
+        // for black's timer
+        fill(255,255,255);
+        rect((BOARD_WIDTH * CELLSIZE) + 10, 48, 110, 96);
+        fill(0, 0, 0);
+        textSize(30);
+        String bTimeString = String.format("%02d:%02d", bRemainingTime / 60, bRemainingTime % 60);
+        text(bTimeString, (BOARD_WIDTH * CELLSIZE) + 10, 96);
     }
+
+    // while checkmate is false, players turn, then computers turn
+
+    // method for is check, at the end of each turn loop through board and check if anyones in check
+        // if in check, check for checkmate
+    // if in check at the start of turn, cannot be in check at the end
+    // if not in check at start of turn, cannot be in check at the end
 
     public static void main(String[] args) {
         PApplet.main("XXLChess.App");
+
+        
+        // if (yourTurn == false){
+        //     System.out.println("LMAO");
+        // }
+
+        // while (checkmated == false){
+        //     if (yourTurn == false){
+        //         System.out.println("making a move");
+        //         // if its checkmate and king is under threat, CPU loses
+        //         if(bKing.isCheck(boardArray) == true && bKing.isCheckmate(boardArray) == true){
+        //             ;
+        //         // if bKing cannot move anywhere but it is not under check, stalemate
+        //         } else if(bKing.isCheck(boardArray) == false && bKing.isCheckmate(boardArray) == true){
+        //             ;
+        //         } else {
+                    
+        //             OpponentMove move = opponent.calcMove(boardArray, bKing);
+                    
+        //             int oldX = (move.getPiece().getX())/CELLSIZE;
+        //             int oldY = (move.getPiece().getY())/CELLSIZE;
+        //             int newX = move.getX();
+        //             int newY = move.getY();
+
+        //             boardArray.get(oldY).set(oldX, null);
+        //             boardArray.get(newY).set(newX, move.getPiece());
+                    
+        //             move.getPiece().setX(newX * CELLSIZE);
+        //             move.getPiece().setY(newY * CELLSIZE);
+        //             System.out.println("was moved!");
+        //             move.getPiece().setFirstMove(false);
+        //             System.out.println("made the move");
+        //         }
+        //         yourTurn = true;
+        //     }
+        // }
     }
 
 }
