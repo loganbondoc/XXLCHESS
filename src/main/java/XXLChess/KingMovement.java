@@ -13,6 +13,10 @@ import java.io.*;
 import java.util.*;
 
 public interface KingMovement {
+    /**
+     * Calculates if piece at (x, y) can move to (xPos, yPos), in what is considered a valid King move.
+     * Valid King move is any square that is directly next to the piece.
+    */
     default boolean isValidKingMove(int xPos, int yPos, ArrayList<ArrayList<Piece>> boardArray, int x, int y) {
         
         int xCell = x / 48;

@@ -273,6 +273,10 @@ public class App extends PApplet {
 
     }
 
+    /**
+     * Player select a piece to move or a square to move selected piece to
+     * CPU then selects move
+    */
     @Override
     public void mousePressed(MouseEvent e) {
         

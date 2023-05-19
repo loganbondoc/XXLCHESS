@@ -67,12 +67,22 @@ public abstract class Piece {
     // methods
     public abstract void tick();
 
+    /**
+     * Calculates if position (xPos, yPos) is a valid move that the piece can make.
+     * Returns an boolean
+    */
     public abstract boolean isValidMove(int xPos, int yPos, ArrayList<ArrayList<Piece>> boardArray);
 
+    /**
+     * Sets the sprite for piece
+    */
     public void setSprite(PImage sprite){
         this.sprite = sprite;
     }
 
+    /**
+     * draws piece by current frame
+    */
     public void draw(PApplet app){
         app.image(this.sprite, this.x, this.y, 48, 48);
     }

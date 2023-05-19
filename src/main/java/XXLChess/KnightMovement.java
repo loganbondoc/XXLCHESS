@@ -13,6 +13,11 @@ import java.io.*;
 import java.util.*;
 
 public interface KnightMovement {
+    
+    /**
+     * Calculates if piece at (x, y) can move to (xPos, yPos), in what is considered a valid Knight move.
+     * Valid Knight move is either two squares across and one up, or vice versa
+    */
     default boolean isValidKnightMove(int xPos, int yPos, ArrayList<ArrayList<Piece>> boardArray, int x, int y) {
         
         int xCell = x / 48;

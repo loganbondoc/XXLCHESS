@@ -38,7 +38,10 @@ public class Opponent {
         return this.difficulty;
     }
 
-    // calculate move to make
+    /**
+     * Calculates the move the opponent will make, based on if they are in check and difficulty setting.
+     * Returns an OpponentMove
+    */
     public OpponentMove calcMove(ArrayList<ArrayList<Piece>> boardArray, King king){  
         
         // if king is in check

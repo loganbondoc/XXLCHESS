@@ -13,6 +13,11 @@ import java.io.*;
 import java.util.*;
 
 public interface RookMovement {
+    
+    /**
+     * Calculates if piece at (x, y) can move to (xPos, yPos), in what is considered a valid rook move.
+     * Valid rook move is horizontally or vertically with no pieces in between current location and destination
+    */
     default boolean isValidRookMove(int xPos, int yPos, ArrayList<ArrayList<Piece>> boardArray, int x, int y) {
         
         int xCell = x / 48;

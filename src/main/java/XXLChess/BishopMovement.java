@@ -13,6 +13,11 @@ import java.io.*;
 import java.util.*;
 
 public interface BishopMovement {
+    
+    /**
+     * Calculates if piece at (x, y) can move to (xPos, yPos), in what is considered a valid Bishop move.
+     * Valid Bishop move is diagonally with no pieces in between current location and destination
+    */
     default boolean isValidBishopMove(int xPos, int yPos, ArrayList<ArrayList<Piece>> boardArray, int x, int y) {
         
         int xCell = x / 48;
