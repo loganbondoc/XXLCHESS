@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>King.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">XXLChess</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">King.java</span></div><h1>King.java</h1><pre class="source lang-java linenums">package XXLChess;
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONObject;
+import processing.data.JSONArray;
+import processing.core.PFont;
+import processing.event.MouseEvent;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.awt.Font;
+import java.io.*;
+import java.util.*;
+
+public class King extends Piece implements KingMovement {
+    
+    public King(String colour, int x, int y){
+<span class="nc" id="L18">        super(colour, x, y, 100);</span>
+<span class="nc" id="L19">    }</span>
+
+    public void tick(){
+        
+<span class="nc" id="L23">    }</span>
+
+    public boolean isCheck(ArrayList&lt;ArrayList&lt;Piece&gt;&gt; boardArray){
+        // method for is check, at the end of each turn loop through board and check if anyones in check
+        
+<span class="nc" id="L28">        int xPos = this.getX()/48;</span>
+<span class="nc" id="L29">        int yPos = this.getY()/48;</span>
+
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        for (int i = 0; i &lt; 14; i++){</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">            for(int j = 0; j &lt; 14; j++){</span>
+                // if looking at the same king piece
+<span class="nc" id="L34">                Piece piece = boardArray.get(i).get(j);</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">                if (piece == null){</span>
+<span class="nc" id="L36">                    continue;</span>
+                }
+
+<span class="nc bnc" id="L39" title="All 2 branches missed.">                if(piece instanceof King == true){</span>
+<span class="nc" id="L40">                    continue;</span>
+                }
+<span class="nc bnc" id="L42" title="All 4 branches missed.">                if (piece.isValidMove(xPos, yPos, boardArray) == true &amp;&amp; piece.getColour() != this.getColour()){</span>
+<span class="nc" id="L43">                    return true;</span>
+                }
+            }
+        }
+<span class="nc" id="L47">        return false;</span>
+    }
+
+    public boolean isCheckmate(ArrayList&lt;ArrayList&lt;Piece&gt;&gt; boardArray){
+        // check the entire board for moves king can make, if none, then return true
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        for (int i = 0; i &lt; 14; i++){</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">            for(int j = 0; j &lt; 14; j++){</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">                if (this.isValidMove(j, i, boardArray) == true){</span>
+<span class="nc" id="L55">                    return false;</span>
+                }
+            }
+        }
+
+        // check for other pieces moves where it is not in check
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        for(int i = 0; i &lt; 14; i++){</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            for(int j = 0; j &lt; 14; j++){</span>
+<span class="nc bnc" id="L63" title="All 4 branches missed.">                if (boardArray.get(i).get(j) == null || boardArray.get(i).get(j).getColour() != this.getColour()){</span>
+<span class="nc" id="L64">                    continue;</span>
+                } else {
+<span class="nc" id="L66">                    Piece chosenPiece = boardArray.get(i).get(j);</span>
+                    // checking every available move for this piece
+<span class="nc bnc" id="L68" title="All 2 branches missed.">                    for(int a = 0; a &lt; 14; a++){</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">                        for(int b = 0; b &lt; 14; b++){</span>
+                            
+<span class="nc bnc" id="L71" title="All 2 branches missed.">                            if (chosenPiece.isValidMove(b, a, boardArray) == true){</span>
+                                // temporarily moving piece to see if check is affected
+<span class="nc" id="L73">                                int oldX = chosenPiece.getX()/48;</span>
+<span class="nc" id="L74">                                int oldY = chosenPiece.getY()/48;</span>
+<span class="nc" id="L75">                                Piece replacedPiece = boardArray.get(a).get(b);</span>
+<span class="nc" id="L76">                                boardArray.get(oldY).set(oldX, null);</span>
+<span class="nc" id="L77">                                boardArray.get(a).set(b, chosenPiece);</span>
+
+<span class="nc bnc" id="L79" title="All 2 branches missed.">                                if (this.isCheck(boardArray) == false){</span>
+                                    // moving piece back
+<span class="nc" id="L81">                                    boardArray.get(oldY).set(oldX, chosenPiece);</span>
+<span class="nc" id="L82">                                    boardArray.get(a).set(b, replacedPiece);</span>
+<span class="nc" id="L83">                                    return false;</span>
+                                }
+                                
+                                // moving piece back
+<span class="nc" id="L87">                                boardArray.get(oldY).set(oldX, chosenPiece);</span>
+<span class="nc" id="L88">                                boardArray.get(a).set(b, replacedPiece);</span>
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+<span class="nc" id="L96">        return true;</span>
+    }
+
+    public boolean isValidMove(int xPos, int yPos, ArrayList&lt;ArrayList&lt;Piece&gt;&gt; boardArray){
+
+        // check if moving into check
+        // loop through each piece on board and check valid moves against square being moved to
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        for (int i = 0; i &lt; 14; i++){</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">            for(int j = 0; j &lt; 14; j++){</span>
+                // System.out.println(&quot;it's been done&quot;);
+<span class="nc" id="L106">                Piece piece = boardArray.get(i).get(j);</span>
+                
+                // if king is selected
+<span class="nc bnc" id="L109" title="All 2 branches missed.">                if(piece instanceof King == true){</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">                    if (piece.getColour() != this.getColour()){</span>
+                        
+                        // if the king is in attacking distance of other king, return false;
+<span class="nc bnc" id="L113" title="All 2 branches missed.">                        if (isValidKingMove(xPos, yPos, boardArray, j, i) == true){</span>
+<span class="nc" id="L114">                            return false;</span>
+                        }
+                    }
+                    continue;
+                
+<span class="nc bnc" id="L119" title="All 2 branches missed.">                } else if (piece != null){</span>
+<span class="nc bnc" id="L120" title="All 4 branches missed.">                    if (piece.isValidMove(xPos, yPos, boardArray) == true &amp;&amp; piece.getColour() != this.getColour()){</span>
+<span class="nc" id="L121">                        return false;</span>
+                    }
+                } else {
+                    continue;
+                }
+            }
+        }
+        
+<span class="nc" id="L129">        return isValidKingMove(xPos, yPos, boardArray, x, y);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

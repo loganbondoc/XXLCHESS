@@ -31,7 +31,6 @@ public class Camel extends Piece {
 
         // move must have an xDistance of 3 and yDistance of 1 or vice versa
         if (xDistance == 3 && yDistance == 1) {
-            // System.out.println("not it chief");
             return true;
         } else if (xDistance == 1 && yDistance == 3) {
             return true;

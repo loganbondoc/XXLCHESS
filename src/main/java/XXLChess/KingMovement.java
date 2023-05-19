@@ -23,7 +23,6 @@ public interface KingMovement {
 
         // move must have a distance of 1 all around
         if (xDistance <= 1 && yDistance <= 1) {
-            // System.out.println("not it chief");
             return true;
         } else {
             return false;

@@ -1,0 +1,635 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>App.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">XXLChess</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">App.java</span></div><h1>App.java</h1><pre class="source lang-java linenums">package XXLChess;
+
+//import org.reflections.Reflections;
+//import org.reflections.scanners.Scanners;
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONObject;
+import processing.data.JSONArray;
+import processing.core.PFont;
+import processing.event.MouseEvent;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.awt.Font;
+import java.io.*;
+import java.util.*;
+
+public class App extends PApplet {
+
+    public static final int SPRITESIZE = 480;
+    public static final int CELLSIZE = 48;
+    public static final int SIDEBAR = 120;
+    public static final int BOARD_WIDTH = 14;
+
+<span class="fc" id="L25">    public static int WIDTH = CELLSIZE*BOARD_WIDTH+SIDEBAR;</span>
+<span class="fc" id="L26">    public static int HEIGHT = BOARD_WIDTH*CELLSIZE;</span>
+
+    public static final int FPS = 60;
+	
+    public String configPath;
+
+    // Arrays for storing last moves {oldX, oldY, newX, newY}
+<span class="fc" id="L33">    public static int[] lastMoves = new int[4];</span>
+<span class="fc" id="L34">    public static boolean firstMove = true;</span>
+    // nested ArrayList for 2D board
+    public static ArrayList&lt;ArrayList&lt;Piece&gt;&gt; boardArray;
+    // boolean for if your choosing a piece to move or if you are moving a piece
+<span class="fc" id="L38">    public static boolean choosingPiece = true;</span>
+    public static Piece selectedPiece;
+
+<span class="fc" id="L41">    public static boolean resignation = false;</span>
+
+    // boolean for whose turn it is
+<span class="fc" id="L44">    public static boolean yourTurn = true;</span>
+<span class="fc" id="L45">    public static boolean checkmated = false;</span>
+    public static King bKing;
+    public static King wKing;
+    public static Opponent opponent;
+
+<span class="fc" id="L50">    public static String restartMessage = &quot;Press 'r' to restart the game&quot;;</span>
+
+    // timers for players and increments
+<span class="fc" id="L53">    public int wIncrement = 2;</span>
+<span class="fc" id="L54">    public int bIncrement = 2;</span>
+
+<span class="fc" id="L56">    public int wLastTime = 0;</span>
+<span class="fc" id="L57">    public int wElapsedTime = 0;</span>
+<span class="fc" id="L58">    public int wRemainingTime = 180; </span>
+<span class="fc" id="L59">    public int bLastTime = 0;</span>
+<span class="fc" id="L60">    public int bElapsedTime = 0;</span>
+<span class="fc" id="L61">    public int bRemainingTime = 180; </span>
+
+    
+    // App happens before main
+<span class="fc" id="L65">    public App() {</span>
+<span class="fc" id="L66">        this.configPath = &quot;config.json&quot;;</span>
+<span class="fc" id="L67">    }</span>
+
+    /**
+     * Initialise the setting of the window size.
+    */
+    public void settings() {
+<span class="nc" id="L73">        size(WIDTH, HEIGHT);</span>
+<span class="nc" id="L74">    }</span>
+
+    /**
+     * Load all resources such as images. Initialise the elements such as the player, enemies and map elements.
+    */
+    public void setup() {
+<span class="nc" id="L80">        frameRate(FPS);</span>
+        
+        // building the board based on &quot;level1.txt&quot;
+        try {
+            // int success = 0;
+<span class="nc" id="L85">            File f = new File(&quot;level1.txt&quot;);</span>
+<span class="nc" id="L86">            Scanner scan = new Scanner(f);</span>
+
+<span class="nc" id="L88">            boardArray = new ArrayList&lt;ArrayList&lt;Piece&gt;&gt;();</span>
+
+<span class="nc bnc" id="L90" title="All 2 branches missed.">            for(int y = 0; y &lt; 14; y++) { // reading vertically</span>
+<span class="nc" id="L91">                String s = scan.nextLine();</span>
+<span class="nc" id="L92">                System.out.println(s);</span>
+
+                // if an empty line, skip to next line and add empty row to array
+<span class="nc bnc" id="L95" title="All 2 branches missed.">                if (s.isEmpty()){</span>
+<span class="nc" id="L96">                    ArrayList&lt;Piece&gt; emptyRow = new ArrayList&lt;Piece&gt;();</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">                    for (int i = 0; i &lt; 14; i++){</span>
+<span class="nc" id="L98">                        emptyRow.add(null);</span>
+<span class="nc" id="L99">                        System.out.println(&quot;added empty cell!&quot;);</span>
+                    }
+<span class="nc" id="L101">                    boardArray.add(emptyRow);</span>
+<span class="nc" id="L102">                    System.out.println(&quot;emptyRow!&quot;);</span>
+<span class="nc" id="L103">                    continue;</span>
+                }
+
+<span class="nc" id="L106">                ArrayList&lt;Piece&gt; boardRow = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                for (int x = 0; x &lt; 14; x++){ // reading horizontally</span>
+<span class="nc" id="L108">                    char c = s.charAt(x);</span>
+                        // initiates new pieces, assigns sprites to each piece and adds them to array
+<span class="nc bnc" id="L110" title="All 23 branches missed.">                        switch (c){</span>
+                            case 'R': // Black Rook
+<span class="nc" id="L112">                                Piece bRook = new Rook(&quot;black&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L113">                                bRook.setSprite(loadImage(&quot;src/main/resources/XXLChess/b-rook.png&quot;));</span>
+<span class="nc" id="L114">                                boardRow.add(bRook);</span>
+<span class="nc" id="L115">                                System.out.println(&quot;added black rook&quot;);</span>
+<span class="nc" id="L116">                                break;</span>
+                            case 'r': // White Rook
+<span class="nc" id="L118">                                Piece wRook = new Rook(&quot;white&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L119">                                wRook.setSprite(loadImage(&quot;src/main/resources/XXLChess/w-rook.png&quot;));</span>
+<span class="nc" id="L120">                                boardRow.add(wRook);</span>
+<span class="nc" id="L121">                                System.out.println(&quot;added white rook&quot;);</span>
+<span class="nc" id="L122">                                break;</span>
+                            case 'P': // Black Pawn
+<span class="nc" id="L124">                                Piece bPawn = new Pawn(&quot;black&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L125">                                bPawn.setSprite(loadImage(&quot;src/main/resources/XXLChess/b-pawn.png&quot;));</span>
+<span class="nc" id="L126">                                boardRow.add(bPawn);</span>
+<span class="nc" id="L127">                                System.out.println(&quot;added black pawn&quot;);</span>
+<span class="nc" id="L128">                                break;</span>
+                            case 'p': // White Pawn
+<span class="nc" id="L130">                                Piece wPawn = new Pawn(&quot;white&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L131">                                wPawn.setSprite(loadImage(&quot;src/main/resources/XXLChess/w-pawn.png&quot;));</span>
+<span class="nc" id="L132">                                boardRow.add(wPawn);</span>
+<span class="nc" id="L133">                                System.out.println(&quot;added white pawn&quot;);</span>
+<span class="nc" id="L134">                                break;</span>
+                            case 'B': // Black Bishop
+<span class="nc" id="L136">                                Piece bBishop = new Bishop(&quot;black&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L137">                                bBishop.setSprite(loadImage(&quot;src/main/resources/XXLChess/b-bishop.png&quot;));</span>
+<span class="nc" id="L138">                                boardRow.add(bBishop);</span>
+<span class="nc" id="L139">                                System.out.println(&quot;added black bishop&quot;);</span>
+<span class="nc" id="L140">                                break;</span>
+                            case 'b': // White Bishop
+<span class="nc" id="L142">                                Piece wBishop = new Bishop(&quot;white&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L143">                                wBishop.setSprite(loadImage(&quot;src/main/resources/XXLChess/w-bishop.png&quot;));</span>
+<span class="nc" id="L144">                                boardRow.add(wBishop);</span>
+<span class="nc" id="L145">                                System.out.println(&quot;added white bishop&quot;);</span>
+<span class="nc" id="L146">                                break;</span>
+                            case 'Q': // Black Queen
+<span class="nc" id="L148">                                Piece bQueen = new Queen(&quot;black&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L149">                                bQueen.setSprite(loadImage(&quot;src/main/resources/XXLChess/b-queen.png&quot;));</span>
+<span class="nc" id="L150">                                boardRow.add(bQueen);</span>
+<span class="nc" id="L151">                                System.out.println(&quot;added black queen&quot;);</span>
+<span class="nc" id="L152">                                break;</span>
+                            case 'q': // White Queen
+<span class="nc" id="L154">                                Piece wQueen = new Queen(&quot;white&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L155">                                wQueen.setSprite(loadImage(&quot;src/main/resources/XXLChess/w-queen.png&quot;));</span>
+<span class="nc" id="L156">                                boardRow.add(wQueen);</span>
+<span class="nc" id="L157">                                System.out.println(&quot;added white queen&quot;);</span>
+<span class="nc" id="L158">                                break;</span>
+                            case 'N': // Black Knight
+<span class="nc" id="L160">                                Piece bKnight = new Knight(&quot;black&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L161">                                bKnight.setSprite(loadImage(&quot;src/main/resources/XXLChess/b-knight.png&quot;));</span>
+<span class="nc" id="L162">                                boardRow.add(bKnight);</span>
+<span class="nc" id="L163">                                System.out.println(&quot;added black knight&quot;);</span>
+<span class="nc" id="L164">                                break;</span>
+                            case 'n': // White Knight
+<span class="nc" id="L166">                                Piece wKnight = new Knight(&quot;white&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L167">                                wKnight.setSprite(loadImage(&quot;src/main/resources/XXLChess/w-knight.png&quot;));</span>
+<span class="nc" id="L168">                                boardRow.add(wKnight);</span>
+<span class="nc" id="L169">                                System.out.println(&quot;added white knight&quot;);</span>
+<span class="nc" id="L170">                                break;</span>
+                            case 'H': // Black Archbishop
+<span class="nc" id="L172">                                Piece bArchbishop = new Archbishop(&quot;black&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L173">                                bArchbishop.setSprite(loadImage(&quot;src/main/resources/XXLChess/b-archbishop.png&quot;));</span>
+<span class="nc" id="L174">                                boardRow.add(bArchbishop);</span>
+<span class="nc" id="L175">                                System.out.println(&quot;added black archbishop&quot;);</span>
+<span class="nc" id="L176">                                break;</span>
+                            case 'h': // White Archbishop
+<span class="nc" id="L178">                                Piece wArchbishop = new Archbishop(&quot;white&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L179">                                wArchbishop.setSprite(loadImage(&quot;src/main/resources/XXLChess/w-archbishop.png&quot;));</span>
+<span class="nc" id="L180">                                boardRow.add(wArchbishop);</span>
+<span class="nc" id="L181">                                System.out.println(&quot;added white archbishop&quot;);</span>
+<span class="nc" id="L182">                                break;</span>
+                            case 'A': // Black Amazon
+<span class="nc" id="L184">                                Piece bAmazon = new Amazon(&quot;black&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L185">                                bAmazon.setSprite(loadImage(&quot;src/main/resources/XXLChess/b-amazon.png&quot;));</span>
+<span class="nc" id="L186">                                boardRow.add(bAmazon);</span>
+<span class="nc" id="L187">                                System.out.println(&quot;added black amazon&quot;);</span>
+<span class="nc" id="L188">                                break;</span>
+                            case 'a': // White Amazon
+<span class="nc" id="L190">                                Piece wAmazon = new Amazon(&quot;white&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L191">                                wAmazon.setSprite(loadImage(&quot;src/main/resources/XXLChess/w-amazon.png&quot;));</span>
+<span class="nc" id="L192">                                boardRow.add(wAmazon);</span>
+<span class="nc" id="L193">                                System.out.println(&quot;added white amazon&quot;);</span>
+<span class="nc" id="L194">                                break;</span>
+                            case 'E': // Black Chancellor
+<span class="nc" id="L196">                                Piece bChancellor = new Chancellor(&quot;black&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L197">                                bChancellor.setSprite(loadImage(&quot;src/main/resources/XXLChess/b-chancellor.png&quot;));</span>
+<span class="nc" id="L198">                                boardRow.add(bChancellor);</span>
+<span class="nc" id="L199">                                System.out.println(&quot;added black chancellor&quot;);</span>
+<span class="nc" id="L200">                                break;</span>
+                            case 'e': // White Chancellor
+<span class="nc" id="L202">                                Piece wChancellor = new Chancellor(&quot;white&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L203">                                wChancellor.setSprite(loadImage(&quot;src/main/resources/XXLChess/w-chancellor.png&quot;));</span>
+<span class="nc" id="L204">                                boardRow.add(wChancellor);</span>
+<span class="nc" id="L205">                                System.out.println(&quot;added white chancellor&quot;);</span>
+<span class="nc" id="L206">                                break;</span>
+                            case 'C': // Black Camel
+<span class="nc" id="L208">                                Piece bCamel = new Camel(&quot;black&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L209">                                bCamel.setSprite(loadImage(&quot;src/main/resources/XXLChess/b-camel.png&quot;));</span>
+<span class="nc" id="L210">                                boardRow.add(bCamel);</span>
+<span class="nc" id="L211">                                System.out.println(&quot;added black camel&quot;);</span>
+<span class="nc" id="L212">                                break;</span>
+                            case 'c': // White Camel
+<span class="nc" id="L214">                                Piece wCamel = new Camel(&quot;white&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L215">                                wCamel.setSprite(loadImage(&quot;src/main/resources/XXLChess/w-camel.png&quot;));</span>
+<span class="nc" id="L216">                                boardRow.add(wCamel);</span>
+<span class="nc" id="L217">                                System.out.println(&quot;added white camel&quot;);</span>
+<span class="nc" id="L218">                                break;</span>
+                            case 'K': // Black King
+<span class="nc" id="L220">                                bKing = new King(&quot;black&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L221">                                bKing.setSprite(loadImage(&quot;src/main/resources/XXLChess/b-king.png&quot;));</span>
+<span class="nc" id="L222">                                boardRow.add(bKing);</span>
+<span class="nc" id="L223">                                System.out.println(&quot;added black king&quot;);</span>
+<span class="nc" id="L224">                                break;</span>
+                            case 'k': // White King
+<span class="nc" id="L226">                                wKing = new King(&quot;white&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L227">                                wKing.setSprite(loadImage(&quot;src/main/resources/XXLChess/w-king.png&quot;));</span>
+<span class="nc" id="L228">                                boardRow.add(wKing);</span>
+<span class="nc" id="L229">                                System.out.println(&quot;added white king&quot;);</span>
+<span class="nc" id="L230">                                break;</span>
+                            case 'G': // Black Guard
+<span class="nc" id="L232">                                Piece bGuard = new Guard(&quot;black&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L233">                                bGuard.setSprite(loadImage(&quot;src/main/resources/XXLChess/b-knight-king.png&quot;));</span>
+<span class="nc" id="L234">                                boardRow.add(bGuard);</span>
+<span class="nc" id="L235">                                System.out.println(&quot;added black guard&quot;);</span>
+<span class="nc" id="L236">                                break;</span>
+                            case 'g': // White Guard
+<span class="nc" id="L238">                                Piece wGuard = new Guard(&quot;white&quot;, (x * CELLSIZE), (y * CELLSIZE));</span>
+<span class="nc" id="L239">                                wGuard.setSprite(loadImage(&quot;src/main/resources/XXLChess/w-knight-king.png&quot;));</span>
+<span class="nc" id="L240">                                boardRow.add(wGuard);</span>
+<span class="nc" id="L241">                                System.out.println(&quot;added white guard&quot;);</span>
+<span class="nc" id="L242">                                break;</span>
+                            default: // empty cell
+<span class="nc" id="L244">                                boardRow.add(null);</span>
+<span class="nc" id="L245">                                System.out.println(&quot;added empty piece&quot;);</span>
+                                break;
+                        }
+                }
+<span class="nc" id="L249">                boardArray.add(boardRow);</span>
+<span class="nc" id="L250">                System.out.println(&quot;onto the next part!&quot;);</span>
+<span class="nc" id="L251">                System.out.println(boardRow);</span>
+<span class="nc" id="L252">                System.out.println(boardRow.size());</span>
+            }
+                // if is a certain type of piece, create that piece
+                // place in a certain point on the board
+<span class="nc" id="L256">            } catch (FileNotFoundException e) {</span>
+<span class="nc" id="L257">                e.printStackTrace();</span>
+<span class="nc" id="L258">            }</span>
+
+		// load config
+<span class="nc" id="L261">        JSONObject conf = loadJSONObject(new File(this.configPath));</span>
+<span class="nc" id="L262">        wIncrement = 2;</span>
+<span class="nc" id="L263">        bIncrement = 2;</span>
+
+        // initialising opponent
+<span class="nc" id="L266">        opponent = new Opponent(&quot;black&quot;, &quot;easy&quot;);</span>
+
+        // clean reset for game
+<span class="nc" id="L269">        firstMove = true;</span>
+<span class="nc" id="L270">        choosingPiece = true;</span>
+<span class="nc" id="L271">        selectedPiece = null;</span>
+<span class="nc" id="L272">        yourTurn = true;</span>
+<span class="nc" id="L273">        checkmated = false;</span>
+<span class="nc" id="L274">        resignation = false;</span>
+
+        // reset for timer
+<span class="nc" id="L277">        wLastTime = 0;</span>
+<span class="nc" id="L278">        wElapsedTime = 0;</span>
+<span class="nc" id="L279">        wRemainingTime = 180; </span>
+<span class="nc" id="L280">        bLastTime = 0;</span>
+<span class="nc" id="L281">        bElapsedTime = 0;</span>
+<span class="nc" id="L282">        bRemainingTime = 180; </span>
+<span class="nc" id="L283">    }</span>
+
+    /**
+     * Receive key pressed signal from the keyboard.
+    */
+    public void keyPressed(){
+<span class="nc bnc" id="L289" title="All 2 branches missed.">        if (key == 'e'){</span>
+<span class="nc" id="L290">            checkmated = true;</span>
+<span class="nc" id="L291">            resignation = true;</span>
+        }
+<span class="nc bnc" id="L293" title="All 4 branches missed.">        if (checkmated == true &amp;&amp; key == 'r'){</span>
+<span class="nc" id="L294">            setup();</span>
+<span class="nc" id="L295">            loop();</span>
+        }
+<span class="nc" id="L297">    }</span>
+    
+    /**
+     * Receive key released signal from the keyboard.
+    */
+    public void keyReleased(){
+
+<span class="nc" id="L304">    }</span>
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        
+        // if in check at the start of turn, cannot be in check at the end
+        // if not in check at start of turn, cannot be in check at the end
+<span class="nc bnc" id="L311" title="All 4 branches missed.">        if(bKing.isCheckmate(boardArray) == true || wKing.isCheckmate(boardArray) == true){</span>
+<span class="nc" id="L312">            checkmated = true;</span>
+        }
+
+        // ensure click is in the bounds of board
+<span class="nc bnc" id="L316" title="All 4 branches missed.">        if (mouseX &lt; (CELLSIZE * 14) &amp;&amp; mouseY &lt; (CELLSIZE * 14)){</span>
+<span class="nc" id="L317">            System.out.println(&quot;Real mouse position is&quot; + (mouseX) + &quot; , &quot; + (mouseY));</span>
+<span class="nc" id="L318">            int xPos = mouseX / CELLSIZE;</span>
+<span class="nc" id="L319">            int yPos = mouseY / CELLSIZE;</span>
+        
+        
+            // Accessing selected piece
+            // indexes between the drawn boardtiles and boardArray are different, need to +1 for tile
+<span class="nc" id="L324">            System.out.println(&quot;Selected square is: &quot; + (xPos + 1) + &quot;, &quot;+ (yPos + 1));</span>
+
+            // if a piece is chosen and choosing a tile to move to
+<span class="nc bnc" id="L327" title="All 2 branches missed.">            if (choosingPiece == false) {</span>
+<span class="nc" id="L328">                System.out.println(&quot;moving a piece&quot;);</span>
+<span class="nc" id="L329">                int oldSpotX = (selectedPiece.getX()/CELLSIZE);</span>
+<span class="nc" id="L330">                int oldSpotY = (selectedPiece.getY()/CELLSIZE);</span>
+<span class="nc" id="L331">                Piece newSelect = boardArray.get(yPos).get(xPos);</span>
+                
+                // if they selected an empty tile
+<span class="nc bnc" id="L334" title="All 2 branches missed.">                if (boardArray.get(yPos).get(xPos) == null){</span>
+                    
+                    // check if any piece is in the way
+<span class="nc bnc" id="L337" title="All 2 branches missed.">                    if(selectedPiece.isValidMove(xPos, yPos, boardArray) == true){</span>
+                        // replace selectedPiece with null and move to new spot in boardArray
+<span class="nc" id="L339">                        boardArray.get(oldSpotY).set(oldSpotX, null);</span>
+<span class="nc" id="L340">                        boardArray.get(yPos).set(xPos, selectedPiece);</span>
+                        
+<span class="nc" id="L342">                        System.out.println((oldSpotX + 1) + &quot;,&quot; + (oldSpotY + 1) + &quot; is now null&quot;);</span>
+<span class="nc" id="L343">                        System.out.println(selectedPiece + &quot;is now at &quot; + (xPos + 1) + &quot;,&quot; + (yPos + 1));</span>
+
+
+                        // set coords for highlighs
+<span class="nc" id="L347">                        lastMoves[0] = oldSpotX * 48;</span>
+<span class="nc" id="L348">                        lastMoves[1] = oldSpotY * 48;</span>
+<span class="nc" id="L349">                        lastMoves[2] = xPos * 48;</span>
+<span class="nc" id="L350">                        lastMoves[3] = yPos * 48;</span>
+
+
+                        //set new coords
+<span class="nc" id="L354">                        selectedPiece.setX(xPos * CELLSIZE);</span>
+<span class="nc" id="L355">                        selectedPiece.setY(yPos * CELLSIZE);</span>
+<span class="nc" id="L356">                        System.out.println(&quot;was moved!&quot;);</span>
+<span class="nc" id="L357">                        selectedPiece.setFirstMove(false);</span>
+<span class="nc" id="L358">                        choosingPiece = true;</span>
+<span class="nc" id="L359">                        selectedPiece = null;</span>
+<span class="nc" id="L360">                        firstMove = false;</span>
+<span class="nc" id="L361">                        yourTurn = false;</span>
+<span class="nc" id="L362">                        wRemainingTime += wIncrement;</span>
+                    
+                    } else {
+<span class="nc" id="L365">                        System.out.println(&quot;doesnt work :(&quot;);</span>
+<span class="nc" id="L366">                        choosingPiece = true;</span>
+<span class="nc" id="L367">                        selectedPiece = null;</span>
+<span class="nc" id="L368">                        yourTurn = true;</span>
+                    }
+                    
+                // if they selected a tile that another piece is on
+                // if its your piece, cannot move
+<span class="nc bnc" id="L373" title="All 2 branches missed.">                } else if (newSelect.getColour() == &quot;white&quot;){</span>
+<span class="nc" id="L374">                    System.out.println(&quot;ur blocked&quot;);</span>
+<span class="nc" id="L375">                    choosingPiece = true;</span>
+<span class="nc" id="L376">                    selectedPiece = null;</span>
+<span class="nc" id="L377">                    yourTurn = true;</span>
+
+                // if its their piece... KILL
+<span class="nc bnc" id="L380" title="All 2 branches missed.">                } else if (newSelect.getColour() == &quot;black&quot;){</span>
+<span class="nc" id="L381">                    System.out.println(&quot;KILL&quot;);</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">                    if(selectedPiece.isValidMove(xPos, yPos, boardArray) == true){</span>
+                        // replace selectedPiece with null and move to new spot in boardArray
+<span class="nc" id="L384">                        boardArray.get(oldSpotY).set(oldSpotX, null);</span>
+<span class="nc" id="L385">                        boardArray.get(yPos).set(xPos, selectedPiece);</span>
+                        
+<span class="nc" id="L387">                        System.out.println((oldSpotX + 1) + &quot;,&quot; + (oldSpotY + 1) + &quot; is now null&quot;);</span>
+<span class="nc" id="L388">                        System.out.println(selectedPiece + &quot;is now at &quot; + (xPos + 1) + &quot;,&quot; + (yPos + 1));</span>
+
+                        // set coords for highlighs
+<span class="nc" id="L391">                        lastMoves[0] = oldSpotX * 48;</span>
+<span class="nc" id="L392">                        lastMoves[1] = oldSpotY * 48;</span>
+<span class="nc" id="L393">                        lastMoves[2] = xPos * 48;</span>
+<span class="nc" id="L394">                        lastMoves[3] = yPos * 48;</span>
+
+                        //set new coords
+<span class="nc" id="L397">                        selectedPiece.setX(xPos * CELLSIZE);</span>
+<span class="nc" id="L398">                        selectedPiece.setY(yPos * CELLSIZE);</span>
+<span class="nc" id="L399">                        System.out.println(&quot;was moved!&quot;);</span>
+
+<span class="nc" id="L401">                        selectedPiece.setFirstMove(false);</span>
+<span class="nc" id="L402">                        choosingPiece = true;</span>
+<span class="nc" id="L403">                        selectedPiece = null;</span>
+<span class="nc" id="L404">                        firstMove = false;</span>
+<span class="nc" id="L405">                        yourTurn = false;</span>
+<span class="nc" id="L406">                        wRemainingTime += wIncrement;</span>
+                    }
+
+                } else {
+<span class="nc" id="L410">                    System.out.println(&quot;HOW DID YOU EVEN GET HERE&quot;);</span>
+                }
+                
+<span class="nc bnc" id="L413" title="All 4 branches missed.">                if(bKing.isCheckmate(boardArray) == true || wKing.isCheckmate(boardArray) == true){</span>
+<span class="nc" id="L414">                    checkmated = true;</span>
+                }
+
+                // opponent makes move
+<span class="nc bnc" id="L418" title="All 2 branches missed.">                if(yourTurn == false){</span>
+<span class="nc" id="L419">                    System.out.println(&quot;making a move&quot;);</span>
+                
+                    // if its checkmate and king is under threat, CPU loses
+<span class="nc bnc" id="L422" title="All 4 branches missed.">                    if(bKing.isCheck(boardArray) == true &amp;&amp; bKing.isCheckmate(boardArray) == true){</span>
+<span class="nc" id="L423">                        System.out.println(&quot;huh&quot;);</span>
+                    // if bKing cannot move anywhere but it is not under check, stalemate
+<span class="nc bnc" id="L425" title="All 4 branches missed.">                    } else if(bKing.isCheck(boardArray) == false &amp;&amp; bKing.isCheckmate(boardArray) == true){</span>
+<span class="nc" id="L426">                        System.out.println(&quot;what&quot;);</span>
+                    // if in check and not checkmate, or neither, make a normal move
+                    } else {
+<span class="nc" id="L429">                        OpponentMove move = opponent.calcMove(boardArray, bKing);</span>
+                        
+<span class="nc" id="L431">                        int oldX = (move.getPiece().getX())/CELLSIZE;</span>
+<span class="nc" id="L432">                        int oldY = (move.getPiece().getY())/CELLSIZE;</span>
+<span class="nc" id="L433">                        int newX = move.getX();</span>
+<span class="nc" id="L434">                        int newY = move.getY();</span>
+
+<span class="nc" id="L436">                        boardArray.get(oldY).set(oldX, null);</span>
+<span class="nc" id="L437">                        boardArray.get(newY).set(newX, move.getPiece());</span>
+
+                        // set coords for highlighs
+<span class="nc" id="L440">                        lastMoves[0] = oldX * 48;</span>
+<span class="nc" id="L441">                        lastMoves[1] = oldY * 48;</span>
+<span class="nc" id="L442">                        lastMoves[2] = newX * 48;</span>
+<span class="nc" id="L443">                        lastMoves[3] = newY * 48;</span>
+                        
+<span class="nc" id="L445">                        move.getPiece().setX(newX * CELLSIZE);</span>
+<span class="nc" id="L446">                        move.getPiece().setY(newY * CELLSIZE);</span>
+<span class="nc" id="L447">                        System.out.println(&quot;was moved!&quot;);</span>
+<span class="nc" id="L448">                        move.getPiece().setFirstMove(false);</span>
+<span class="nc" id="L449">                        System.out.println(&quot;made the move&quot;);</span>
+<span class="nc" id="L450">                        yourTurn = true;</span>
+                    }
+                }
+                
+            
+            // if choosing a piece
+<span class="nc" id="L456">            } else {</span>
+<span class="nc" id="L457">                selectedPiece = boardArray.get(yPos).get(xPos);</span>
+<span class="nc" id="L458">                System.out.println(selectedPiece);</span>
+                
+                // if they chose an empty tile
+<span class="nc bnc" id="L461" title="All 2 branches missed.">                if(selectedPiece == null){</span>
+<span class="nc" id="L462">                    choosingPiece = true;</span>
+<span class="nc" id="L463">                    yourTurn = true;</span>
+                
+                // if you choose a tile with your thing on it
+<span class="nc bnc" id="L466" title="All 2 branches missed.">                } else if(selectedPiece.getColour() == &quot;white&quot;) {</span>
+<span class="nc" id="L467">                    System.out.println(&quot;piece was chosen&quot;);</span>
+<span class="nc" id="L468">                    choosingPiece = false;</span>
+<span class="nc" id="L469">                    yourTurn = true;</span>
+                
+                // if you choose a tile with someone elses piece on it
+                } else {
+<span class="nc" id="L473">                    choosingPiece = true;</span>
+<span class="nc" id="L474">                    selectedPiece = null;</span>
+<span class="nc" id="L475">                    System.out.println(&quot;not ur piece&quot;);</span>
+<span class="nc" id="L476">                    yourTurn = true;</span>
+                }
+            }
+        }
+<span class="nc" id="L480">    }</span>
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        
+<span class="nc" id="L485">    }</span>
+
+    /**
+     * Draw all elements in the game by current frame. 
+    */
+    public void draw() {
+        // drawing board
+<span class="nc" id="L492">        boolean white = true;</span>
+<span class="nc" id="L493">        noStroke();</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">        for (int y = 0; y &lt; CELLSIZE * BOARD_WIDTH; y += CELLSIZE){</span>
+<span class="nc bnc" id="L495" title="All 2 branches missed.">            for (int x = 0; x &lt; CELLSIZE * BOARD_WIDTH; x += CELLSIZE){</span>
+                
+<span class="nc bnc" id="L497" title="All 2 branches missed.">                if (white == false){</span>
+<span class="nc" id="L498">                    fill(181, 136, 99);</span>
+<span class="nc" id="L499">                    white = true;</span>
+                } else {
+<span class="nc" id="L501">                    fill(240, 217, 181);</span>
+<span class="nc" id="L502">                    white = false;</span>
+                }
+
+<span class="nc" id="L505">                rect(x, y, CELLSIZE, CELLSIZE);</span>
+            }
+<span class="nc bnc" id="L507" title="All 2 branches missed.">            if (white == false){</span>
+<span class="nc" id="L508">                white = true;</span>
+            } else {
+<span class="nc" id="L510">                white = false; </span>
+            }
+        }
+
+        // last move highlight
+<span class="nc bnc" id="L515" title="All 2 branches missed.">        if (firstMove == false){</span>
+<span class="nc" id="L516">            fill(170, 162, 58);</span>
+<span class="nc" id="L517">            rect(lastMoves[0], lastMoves[1], CELLSIZE, CELLSIZE);</span>
+<span class="nc" id="L518">            rect(lastMoves[2], lastMoves[3], CELLSIZE, CELLSIZE);</span>
+        }
+
+        // piece highlights
+<span class="nc bnc" id="L522" title="All 4 branches missed.">        if (choosingPiece == false &amp;&amp; selectedPiece.getColour() == &quot;white&quot;){</span>
+            // of selected piece, check on board all available moves
+<span class="nc bnc" id="L524" title="All 2 branches missed.">            for (int i = 0; i &lt; 14; i++){</span>
+<span class="nc bnc" id="L525" title="All 2 branches missed.">                for (int j = 0; j &lt; 14; j++){</span>
+<span class="nc bnc" id="L526" title="All 2 branches missed.">                    if(selectedPiece.isValidMove(j, i, boardArray) == true){ </span>
+                        
+                        // if its empty make it blue
+<span class="nc bnc" id="L529" title="All 2 branches missed.">                        if (boardArray.get(i).get(j) == null){</span>
+<span class="nc" id="L530">                            fill(137, 207, 240, 155);</span>
+<span class="nc" id="L531">                            rect(j * CELLSIZE, i * CELLSIZE, CELLSIZE, CELLSIZE);</span>
+                        }
+                        
+                        // if piece is white dont fill
+<span class="nc bnc" id="L535" title="All 4 branches missed.">                        if (boardArray.get(i).get(j) != null &amp;&amp; boardArray.get(i).get(j).getColour() == &quot;white&quot;){</span>
+<span class="nc" id="L536">                            continue;</span>
+                        }
+        
+                        // if piece is black fill red
+<span class="nc bnc" id="L540" title="All 4 branches missed.">                        if (boardArray.get(i).get(j) != null &amp;&amp; boardArray.get(i).get(j).getColour() == &quot;black&quot;){</span>
+<span class="nc" id="L541">                            fill(215, 0, 0, 90);</span>
+<span class="nc" id="L542">                            rect(j * CELLSIZE, i * CELLSIZE, CELLSIZE, CELLSIZE);</span>
+                        } 
+                    } 
+                }
+            }
+            // drawing green rect of selected piece
+<span class="nc" id="L548">            fill(105, 138, 76);</span>
+<span class="nc" id="L549">            rect(selectedPiece.getX(), selectedPiece.getY(), CELLSIZE, CELLSIZE);</span>
+        }
+
+        // drawing pieces to board
+<span class="nc bnc" id="L553" title="All 2 branches missed.">        for(int i = 0; i &lt; 14; i++){</span>
+<span class="nc bnc" id="L554" title="All 2 branches missed.">            for(int j = 0; j &lt; 14; j++){</span>
+<span class="nc" id="L555">                Piece cell = boardArray.get(i).get(j);</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">                if(cell == null){</span>
+<span class="nc" id="L557">                    continue;</span>
+                }
+<span class="nc" id="L559">                cell.tick();</span>
+<span class="nc" id="L560">                cell.draw(this);</span>
+            }
+        }
+
+        // drawing timer
+<span class="nc" id="L565">        int currentTime = millis();</span>
+        
+        // for white timer
+<span class="nc bnc" id="L568" title="All 2 branches missed.">        if (yourTurn == true) { </span>
+<span class="nc" id="L569">            wElapsedTime += currentTime - wLastTime;</span>
+<span class="nc" id="L570">            wLastTime = currentTime;</span>
+<span class="nc" id="L571">            wRemainingTime = 180 - (wElapsedTime / 1000);</span>
+        }
+
+        // for black timer
+<span class="nc bnc" id="L575" title="All 2 branches missed.">        if (yourTurn == false) { </span>
+<span class="nc" id="L576">            bElapsedTime += currentTime - bLastTime;</span>
+<span class="nc" id="L577">            bLastTime = currentTime;</span>
+<span class="nc" id="L578">            bRemainingTime = 180 - (bElapsedTime / 1000);</span>
+        }
+        
+        // for white's timer
+<span class="nc" id="L582">        fill(204,204,204);</span>
+<span class="nc" id="L583">        rect((BOARD_WIDTH * CELLSIZE) + 10, 576, 110, 96);</span>
+<span class="nc" id="L584">        fill(0, 0, 0);</span>
+<span class="nc" id="L585">        textSize(30);</span>
+<span class="nc" id="L586">        String wTimeString = String.format(&quot;%02d:%02d&quot;, wRemainingTime / 60, wRemainingTime % 60);</span>
+<span class="nc" id="L587">        text(wTimeString, (BOARD_WIDTH * CELLSIZE) + 10, 624);</span>
+
+        // for black's timer
+<span class="nc" id="L590">        fill(204,204,204);</span>
+<span class="nc" id="L591">        rect((BOARD_WIDTH * CELLSIZE) + 10, 48, 110, 96);</span>
+<span class="nc" id="L592">        fill(0, 0, 0);</span>
+<span class="nc" id="L593">        textSize(30);</span>
+<span class="nc" id="L594">        String bTimeString = String.format(&quot;%02d:%02d&quot;, bRemainingTime / 60, bRemainingTime % 60);</span>
+<span class="nc" id="L595">        text(bTimeString, (BOARD_WIDTH * CELLSIZE) + 10, 96);</span>
+
+        // end of game messages
+<span class="nc bnc" id="L598" title="All 2 branches missed.">        if (checkmated == true){</span>
+<span class="nc" id="L599">            noLoop();</span>
+<span class="nc" id="L600">            textSize(17);</span>
+<span class="nc" id="L601">            fill(0, 0, 0);</span>
+<span class="nc" id="L602">            String endMessage = &quot;&quot;;</span>
+            // if black wins
+<span class="nc bnc" id="L604" title="All 2 branches missed.">            if(wKing.isCheckmate(boardArray) == true){</span>
+<span class="nc" id="L605">                endMessage = &quot;You lost by checkmate!&quot;;</span>
+            // if white wins
+<span class="nc bnc" id="L607" title="All 2 branches missed.">            } else if (wKing.isCheckmate(boardArray) == true){</span>
+<span class="nc" id="L608">                endMessage = &quot;You won by checkmate!&quot;;</span>
+
+<span class="nc bnc" id="L610" title="All 2 branches missed.">            } else if (resignation == true){</span>
+<span class="nc" id="L611">                endMessage = &quot;You lost by resignation&quot;;</span>
+            // in the case of a stalemate
+            } else {
+<span class="nc" id="L614">                endMessage = &quot;You won by checkmate!&quot;;</span>
+            }
+<span class="nc" id="L616">            text(endMessage, 682, 156, 96, 96); </span>
+<span class="nc" id="L617">            text(restartMessage, 682, 400, 96, 96);</span>
+<span class="nc" id="L618">        } else {</span>
+<span class="nc" id="L619">            fill(204,204,204);</span>
+<span class="nc" id="L620">            rect(682, 156, 400, 400);</span>
+        }
+<span class="nc" id="L622">    }</span>
+
+    // while checkmate is false, players turn, then computers turn
+
+    // method for is check, at the end of each turn loop through board and check if anyones in check
+        // if in check, check for checkmate
+    // if in check at the start of turn, cannot be in check at the end
+    // if not in check at start of turn, cannot be in check at the end
+
+    public static void main(String[] args) {
+<span class="nc" id="L632">        PApplet.main(&quot;XXLChess.App&quot;);</span>
+<span class="nc" id="L633">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

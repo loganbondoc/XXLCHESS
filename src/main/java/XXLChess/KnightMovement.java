@@ -23,7 +23,6 @@ public interface KnightMovement {
 
         // move must have an xDistance of 2 and yDistance of 1 or vice versa
         if (xDistance == 2 && yDistance == 1) {
-            // System.out.println("not it chief");
             return true;
         } else if (xDistance == 1 && yDistance == 2) {
             return true;

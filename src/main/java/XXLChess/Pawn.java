@@ -43,7 +43,6 @@ public class Pawn extends Piece {
             int checkedY = yCell + tempY;
             while (checkedX != xPos || checkedY != yPos) {
                 if (boardArray.get(checkedY).get(checkedX) != null) {
-                    // System.out.println("AHA A PIECE!");
                     return false;
                 }
             checkedX += tempX;

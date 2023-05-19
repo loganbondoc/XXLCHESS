@@ -20,7 +20,6 @@ public interface RookMovement {
 
         // Check that move is directly horizontal or vertical
         if (xCell != xPos && yCell != yPos) {
-            // System.out.println("not hori or verti");
             return false;
         }
 
@@ -31,7 +30,6 @@ public interface RookMovement {
         int checkedY = yCell + tempY;
         while (checkedX != xPos || checkedY != yPos) {
             if (boardArray.get(checkedY).get(checkedX) != null) {
-                // System.out.println("AHA A PIECE!");
                 return false;
             }
             checkedX += tempX;

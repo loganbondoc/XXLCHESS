@@ -26,37 +26,37 @@ public class App extends PApplet {
     public static int HEIGHT = BOARD_WIDTH*CELLSIZE;
 
     public static final int FPS = 60;
-	
     public String configPath;
 
-    // Arrays for storing last moves {oldX, oldY, newX, newY}
-    public static int[] lastMoves = new int[4];
-    public static boolean firstMove = true;
-    // nested ArrayList for 2D board
-    public static ArrayList<ArrayList<Piece>> boardArray;
-    // boolean for if your choosing a piece to move or if you are moving a piece
-    public static boolean choosingPiece = true;
-    public static Piece selectedPiece;
+    // Drawing Elements
+    public static int[] lastMoves = new int[4]; // storing last moves {oldX, oldY, newX, newY}
+    
 
-    // boolean for whose turn it is
-    public static boolean yourTurn = true;
-    public static boolean checkmated = false;
+    // Game Elements
+    public static boolean firstMove = true;
+    public static ArrayList<ArrayList<Piece>> boardArray; // nested ArrayList for 2D board
+    public static boolean choosingPiece = true; // if choosing or moving a piece
+    public static Piece selectedPiece; // piece that is chosen to move
     public static King bKing;
     public static King wKing;
     public static Opponent opponent;
+    
+    public static boolean resignation = false; // if player resigns
+    public static boolean yourTurn = true;
+    public static boolean checkmated = false; // only change if game has ended
+
+    public static String restartMessage = "Press 'r' to restart the game";
 
     // timers for players and increments
-    public int wTotalTime;
-    public int bTotalTime;
-    public int wRemainingTime;
-    public int bRemainingTime;
-    public int wElapsedTime;
-    public int bElapsedTime;
     public int wIncrement;
     public int bIncrement;
+    public int wLastTime = 0;
+    public int wElapsedTime = 0;
+    public int wRemainingTime; 
+    public int bLastTime = 0;
+    public int bElapsedTime = 0;
+    public int bRemainingTime; 
 
-    
-    // App happens before main
     public App() {
         this.configPath = "config.json";
     }
@@ -74,10 +74,17 @@ public class App extends PApplet {
     public void setup() {
         frameRate(FPS);
         
-        // building the board based on "level1.txt"
+        // load config
+        JSONObject conf = loadJSONObject(new File(this.configPath));
+        wIncrement = conf.getJSONObject("time_controls").getJSONObject("player").getInt("increment");
+        bIncrement = conf.getJSONObject("time_controls").getJSONObject("cpu").getInt("increment");
+        wRemainingTime = conf.getJSONObject("time_controls").getJSONObject("player").getInt("seconds");
+        bRemainingTime = conf.getJSONObject("time_controls").getJSONObject("cpu").getInt("seconds");
+        String difficulty = conf.getString("difficulty");
+
+        // building the board based on file in config
         try {
-            // int success = 0;
-            File f = new File("level1.txt");
+            File f = new File(conf.getString("layout"));
             Scanner scan = new Scanner(f);
 
             boardArray = new ArrayList<ArrayList<Piece>>();
@@ -91,186 +98,172 @@ public class App extends PApplet {
                     ArrayList<Piece> emptyRow = new ArrayList<Piece>();
                     for (int i = 0; i < 14; i++){
                         emptyRow.add(null);
-                        System.out.println("added empty cell!");
                     }
                     boardArray.add(emptyRow);
-                    System.out.println("emptyRow!");
                     continue;
                 }
 
                 ArrayList<Piece> boardRow = new ArrayList<>();
                 for (int x = 0; x < 14; x++){ // reading horizontally
                     char c = s.charAt(x);
-                        // initiates new pieces, assigns sprites to each piece and adds them to array
+                        // initiates new pieces, assigns sprites to each piece and adds them to row
                         switch (c){
                             case 'R': // Black Rook
                                 Piece bRook = new Rook("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bRook.setSprite(loadImage("src/main/resources/XXLChess/b-rook.png"));
                                 boardRow.add(bRook);
-                                System.out.println("added black rook");
                                 break;
                             case 'r': // White Rook
                                 Piece wRook = new Rook("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wRook.setSprite(loadImage("src/main/resources/XXLChess/w-rook.png"));
                                 boardRow.add(wRook);
-                                System.out.println("added white rook");
                                 break;
                             case 'P': // Black Pawn
                                 Piece bPawn = new Pawn("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bPawn.setSprite(loadImage("src/main/resources/XXLChess/b-pawn.png"));
                                 boardRow.add(bPawn);
-                                System.out.println("added black pawn");
                                 break;
                             case 'p': // White Pawn
                                 Piece wPawn = new Pawn("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wPawn.setSprite(loadImage("src/main/resources/XXLChess/w-pawn.png"));
                                 boardRow.add(wPawn);
-                                System.out.println("added white pawn");
                                 break;
                             case 'B': // Black Bishop
                                 Piece bBishop = new Bishop("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bBishop.setSprite(loadImage("src/main/resources/XXLChess/b-bishop.png"));
                                 boardRow.add(bBishop);
-                                System.out.println("added black bishop");
                                 break;
                             case 'b': // White Bishop
                                 Piece wBishop = new Bishop("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wBishop.setSprite(loadImage("src/main/resources/XXLChess/w-bishop.png"));
                                 boardRow.add(wBishop);
-                                System.out.println("added white bishop");
                                 break;
                             case 'Q': // Black Queen
                                 Piece bQueen = new Queen("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bQueen.setSprite(loadImage("src/main/resources/XXLChess/b-queen.png"));
                                 boardRow.add(bQueen);
-                                System.out.println("added black queen");
                                 break;
                             case 'q': // White Queen
                                 Piece wQueen = new Queen("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wQueen.setSprite(loadImage("src/main/resources/XXLChess/w-queen.png"));
                                 boardRow.add(wQueen);
-                                System.out.println("added white queen");
                                 break;
                             case 'N': // Black Knight
                                 Piece bKnight = new Knight("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bKnight.setSprite(loadImage("src/main/resources/XXLChess/b-knight.png"));
                                 boardRow.add(bKnight);
-                                System.out.println("added black knight");
                                 break;
                             case 'n': // White Knight
                                 Piece wKnight = new Knight("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wKnight.setSprite(loadImage("src/main/resources/XXLChess/w-knight.png"));
                                 boardRow.add(wKnight);
-                                System.out.println("added white knight");
                                 break;
                             case 'H': // Black Archbishop
                                 Piece bArchbishop = new Archbishop("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bArchbishop.setSprite(loadImage("src/main/resources/XXLChess/b-archbishop.png"));
                                 boardRow.add(bArchbishop);
-                                System.out.println("added black archbishop");
                                 break;
                             case 'h': // White Archbishop
                                 Piece wArchbishop = new Archbishop("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wArchbishop.setSprite(loadImage("src/main/resources/XXLChess/w-archbishop.png"));
                                 boardRow.add(wArchbishop);
-                                System.out.println("added white archbishop");
                                 break;
                             case 'A': // Black Amazon
                                 Piece bAmazon = new Amazon("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bAmazon.setSprite(loadImage("src/main/resources/XXLChess/b-amazon.png"));
                                 boardRow.add(bAmazon);
-                                System.out.println("added black amazon");
                                 break;
                             case 'a': // White Amazon
                                 Piece wAmazon = new Amazon("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wAmazon.setSprite(loadImage("src/main/resources/XXLChess/w-amazon.png"));
                                 boardRow.add(wAmazon);
-                                System.out.println("added white amazon");
                                 break;
                             case 'E': // Black Chancellor
                                 Piece bChancellor = new Chancellor("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bChancellor.setSprite(loadImage("src/main/resources/XXLChess/b-chancellor.png"));
                                 boardRow.add(bChancellor);
-                                System.out.println("added black chancellor");
                                 break;
                             case 'e': // White Chancellor
                                 Piece wChancellor = new Chancellor("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wChancellor.setSprite(loadImage("src/main/resources/XXLChess/w-chancellor.png"));
                                 boardRow.add(wChancellor);
-                                System.out.println("added white chancellor");
                                 break;
                             case 'C': // Black Camel
                                 Piece bCamel = new Camel("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bCamel.setSprite(loadImage("src/main/resources/XXLChess/b-camel.png"));
                                 boardRow.add(bCamel);
-                                System.out.println("added black camel");
                                 break;
                             case 'c': // White Camel
                                 Piece wCamel = new Camel("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wCamel.setSprite(loadImage("src/main/resources/XXLChess/w-camel.png"));
                                 boardRow.add(wCamel);
-                                System.out.println("added white camel");
                                 break;
                             case 'K': // Black King
                                 bKing = new King("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bKing.setSprite(loadImage("src/main/resources/XXLChess/b-king.png"));
                                 boardRow.add(bKing);
-                                System.out.println("added black king");
                                 break;
                             case 'k': // White King
                                 wKing = new King("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wKing.setSprite(loadImage("src/main/resources/XXLChess/w-king.png"));
                                 boardRow.add(wKing);
-                                System.out.println("added white king");
                                 break;
                             case 'G': // Black Guard
                                 Piece bGuard = new Guard("black", (x * CELLSIZE), (y * CELLSIZE));
                                 bGuard.setSprite(loadImage("src/main/resources/XXLChess/b-knight-king.png"));
                                 boardRow.add(bGuard);
-                                System.out.println("added black guard");
                                 break;
                             case 'g': // White Guard
                                 Piece wGuard = new Guard("white", (x * CELLSIZE), (y * CELLSIZE));
                                 wGuard.setSprite(loadImage("src/main/resources/XXLChess/w-knight-king.png"));
                                 boardRow.add(wGuard);
-                                System.out.println("added white guard");
                                 break;
                             default: // empty cell
                                 boardRow.add(null);
-                                System.out.println("added empty piece");
                                 break;
                         }
                 }
-                boardArray.add(boardRow);
-                System.out.println("onto the next part!");
-                System.out.println(boardRow);
-                System.out.println(boardRow.size());
+                boardArray.add(boardRow); // row is added to board
             }
-                // if is a certain type of piece, create that piece
-                // place in a certain point on the board
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
 
-		// load config
-        JSONObject conf = loadJSONObject(new File(this.configPath));
-        wTotalTime = 180;
-        bTotalTime = 180;
-        wIncrement = 2;
-        bIncrement = 2;
-
         // initialising opponent
-        opponent = new Opponent("black", "easy");
+        opponent = new Opponent("black", difficulty);
+
+        // clean reset for game
+        firstMove = true;
+        choosingPiece = true;
+        selectedPiece = null;
+        yourTurn = true;
+        checkmated = false;
+        resignation = false;
+
+        // reset for timer
+        wLastTime = 0;
+        wElapsedTime = 0;
+        bLastTime = 0;
+        bElapsedTime = 0;
+
+        System.out.println("Game Loaded Successfully");
     }
 
     /**
      * Receive key pressed signal from the keyboard.
     */
     public void keyPressed(){
-        // if key == 'e'
-            // checkmated == true
-        // if checkmated == true and key == 'r'
-            // call setup again
+        // if player presses 'e' to resign
+        if (key == 'e'){
+            checkmated = true;
+            resignation = true;
+        }
+        
+        // if player presses 'r' to restart game
+        if (checkmated == true && key == 'r'){
+            setup();
+            loop();
+        }
     }
     
     /**
@@ -283,9 +276,12 @@ public class App extends PApplet {
     @Override
     public void mousePressed(MouseEvent e) {
         
+        if(bKing.isCheckmate(boardArray) == true || wKing.isCheckmate(boardArray) == true){
+            checkmated = true;
+        }
+
         // ensure click is in the bounds of board
         if (mouseX < (CELLSIZE * 14) && mouseY < (CELLSIZE * 14)){
-            System.out.println("Real mouse position is" + (mouseX) + " , " + (mouseY));
             int xPos = mouseX / CELLSIZE;
             int yPos = mouseY / CELLSIZE;
         
@@ -293,10 +289,9 @@ public class App extends PApplet {
             // Accessing selected piece
             // indexes between the drawn boardtiles and boardArray are different, need to +1 for tile
             System.out.println("Selected square is: " + (xPos + 1) + ", "+ (yPos + 1));
-            
+
             // if a piece is chosen and choosing a tile to move to
             if (choosingPiece == false) {
-                System.out.println("moving a piece");
                 int oldSpotX = (selectedPiece.getX()/CELLSIZE);
                 int oldSpotY = (selectedPiece.getY()/CELLSIZE);
                 Piece newSelect = boardArray.get(yPos).get(xPos);
@@ -306,12 +301,11 @@ public class App extends PApplet {
                     
                     // check if any piece is in the way
                     if(selectedPiece.isValidMove(xPos, yPos, boardArray) == true){
+                        
                         // replace selectedPiece with null and move to new spot in boardArray
                         boardArray.get(oldSpotY).set(oldSpotX, null);
                         boardArray.get(yPos).set(xPos, selectedPiece);
-                        
-                        System.out.println((oldSpotX + 1) + "," + (oldSpotY + 1) + " is now null");
-                        System.out.println(selectedPiece + "is now at " + (xPos + 1) + "," + (yPos + 1));
+                        System.out.println(selectedPiece + " is now at " + (xPos + 1) + "," + (yPos + 1));
 
 
                         // set coords for highlighs
@@ -324,25 +318,27 @@ public class App extends PApplet {
                         //set new coords
                         selectedPiece.setX(xPos * CELLSIZE);
                         selectedPiece.setY(yPos * CELLSIZE);
-                        System.out.println("was moved!");
                         selectedPiece.setFirstMove(false);
                         choosingPiece = true;
                         selectedPiece = null;
                         firstMove = false;
                         yourTurn = false;
+                        wRemainingTime += wIncrement;
                     
                     } else {
-                        System.out.println("doesnt work :(");
+                        System.out.println("not a valid move :(");
                         choosingPiece = true;
                         selectedPiece = null;
+                        yourTurn = true;
                     }
                     
                 // if they selected a tile that another piece is on
                 // if its your piece, cannot move
                 } else if (newSelect.getColour() == "white"){
-                    System.out.println("ur blocked");
+                    System.out.println("blocked");
                     choosingPiece = true;
                     selectedPiece = null;
+                    yourTurn = true;
 
                 // if its their piece... KILL
                 } else if (newSelect.getColour() == "black"){
@@ -351,8 +347,6 @@ public class App extends PApplet {
                         // replace selectedPiece with null and move to new spot in boardArray
                         boardArray.get(oldSpotY).set(oldSpotX, null);
                         boardArray.get(yPos).set(xPos, selectedPiece);
-                        
-                        System.out.println((oldSpotX + 1) + "," + (oldSpotY + 1) + " is now null");
                         System.out.println(selectedPiece + "is now at " + (xPos + 1) + "," + (yPos + 1));
 
                         // set coords for highlighs
@@ -364,70 +358,81 @@ public class App extends PApplet {
                         //set new coords
                         selectedPiece.setX(xPos * CELLSIZE);
                         selectedPiece.setY(yPos * CELLSIZE);
-                        System.out.println("was moved!");
+
+                        selectedPiece.setFirstMove(false);
+                        choosingPiece = true;
+                        selectedPiece = null;
+                        firstMove = false;
+                        yourTurn = false;
+                        wRemainingTime += wIncrement;
                     }
-                    selectedPiece.setFirstMove(false);
-                    choosingPiece = true;
-                    selectedPiece = null;
-                    firstMove = false;
-                    yourTurn = false;
 
                 } else {
                     System.out.println("HOW DID YOU EVEN GET HERE");
                 }
                 
-                // opponent makes move
-                System.out.println("making a move");
-                
-                // if its checkmate and king is under threat, CPU loses
-                if(bKing.isCheck(boardArray) == true && bKing.isCheckmate(boardArray) == true){
-                    ;
-                // if bKing cannot move anywhere but it is not under check, stalemate
-                } else if(bKing.isCheck(boardArray) == false && bKing.isCheckmate(boardArray) == true){
-                    ;
-                } else {
-                    OpponentMove move = opponent.calcMove(boardArray, bKing);
-                    
-                    int oldX = (move.getPiece().getX())/CELLSIZE;
-                    int oldY = (move.getPiece().getY())/CELLSIZE;
-                    int newX = move.getX();
-                    int newY = move.getY();
-
-                    boardArray.get(oldY).set(oldX, null);
-                    boardArray.get(newY).set(newX, move.getPiece());
-
-                    // set coords for highlighs
-                    lastMoves[0] = oldX * 48;
-                    lastMoves[1] = oldY * 48;
-                    lastMoves[2] = newX * 48;
-                    lastMoves[3] = newY * 48;
-                    
-                    move.getPiece().setX(newX * CELLSIZE);
-                    move.getPiece().setY(newY * CELLSIZE);
-                    System.out.println("was moved!");
-                    move.getPiece().setFirstMove(false);
-                    System.out.println("made the move");
+                if(bKing.isCheckmate(boardArray) == true || wKing.isCheckmate(boardArray) == true){
+                    checkmated = true;
                 }
+
+                // opponent makes move
+                if(yourTurn == false){
+                    System.out.println("making a move");
+                
+                    // if its checkmate and king is under threat, CPU loses
+                    if(bKing.isCheck(boardArray) == true && bKing.isCheckmate(boardArray) == true){
+                        checkmated = true;
+                    // if bKing cannot move anywhere but it is not under check, stalemate
+                    } else if(bKing.isCheck(boardArray) == false && bKing.isCheckmate(boardArray) == true){
+                        checkmated = true;
+                    // if in check and not checkmate, or neither, make a normal move
+                    } else {
+                        OpponentMove move = opponent.calcMove(boardArray, bKing);
+                        
+                        int oldX = (move.getPiece().getX())/CELLSIZE;
+                        int oldY = (move.getPiece().getY())/CELLSIZE;
+                        int newX = move.getX();
+                        int newY = move.getY();
+
+                        boardArray.get(oldY).set(oldX, null);
+                        boardArray.get(newY).set(newX, move.getPiece());
+
+                        // set coords for highlighs
+                        lastMoves[0] = oldX * 48;
+                        lastMoves[1] = oldY * 48;
+                        lastMoves[2] = newX * 48;
+                        lastMoves[3] = newY * 48;
+                        
+                        move.getPiece().setX(newX * CELLSIZE);
+                        move.getPiece().setY(newY * CELLSIZE);
+                        move.getPiece().setFirstMove(false);
+                        System.out.println("Opponent made move");
+                        yourTurn = true;
+                        bRemainingTime += bIncrement;
+                    }
+                }
+                
             
             // if choosing a piece
             } else {
                 selectedPiece = boardArray.get(yPos).get(xPos);
-                System.out.println(selectedPiece);
                 
                 // if they chose an empty tile
                 if(selectedPiece == null){
                     choosingPiece = true;
+                    yourTurn = true;
                 
                 // if you choose a tile with your thing on it
                 } else if(selectedPiece.getColour() == "white") {
-                    System.out.println("piece was chosen");
                     choosingPiece = false;
+                    yourTurn = true;
                 
                 // if you choose a tile with someone elses piece on it
                 } else {
                     choosingPiece = true;
                     selectedPiece = null;
-                    System.out.println("not ur piece");
+                    System.out.println("That's not your piece!");
+                    yourTurn = true;
                 }
             }
         }
@@ -442,12 +447,14 @@ public class App extends PApplet {
      * Draw all elements in the game by current frame. 
     */
     public void draw() {
+        
         // drawing board
         boolean white = true;
         noStroke();
         for (int y = 0; y < CELLSIZE * BOARD_WIDTH; y += CELLSIZE){
             for (int x = 0; x < CELLSIZE * BOARD_WIDTH; x += CELLSIZE){
                 
+                // to get checkerboard pattern
                 if (white == false){
                     fill(181, 136, 99);
                     white = true;
@@ -498,12 +505,12 @@ public class App extends PApplet {
                     } 
                 }
             }
-            // drawing green rect of selected piece
+            // drawing green highlight of selected piece
             fill(105, 138, 76);
             rect(selectedPiece.getX(), selectedPiece.getY(), CELLSIZE, CELLSIZE);
         }
 
-        // drawing pieces to board
+        // drawing all pieces to board
         for(int i = 0; i < 14; i++){
             for(int j = 0; j < 14; j++){
                 Piece cell = boardArray.get(i).get(j);
@@ -516,15 +523,24 @@ public class App extends PApplet {
         }
 
         // drawing timer
-        if (yourTurn == true){
-            // int currentTime = millis()/1000;
-            wRemainingTime = wTotalTime - (millis()/1000);
-        } else {
-            bRemainingTime = bTotalTime - (millis()/1000);
+        int currentTime = millis();
+        
+        // for white timer
+        if (yourTurn == true) { 
+            wElapsedTime += currentTime - wLastTime;
+            wLastTime = currentTime;
+            wRemainingTime = 180 - (wElapsedTime / 1000);
+        }
+
+        // for black timer
+        if (yourTurn == false) { 
+            bElapsedTime += currentTime - bLastTime;
+            bLastTime = currentTime;
+            bRemainingTime = 180 - (bElapsedTime / 1000);
         }
         
         // for white's timer
-        fill(255,255,255);
+        fill(204,204,204);
         rect((BOARD_WIDTH * CELLSIZE) + 10, 576, 110, 96);
         fill(0, 0, 0);
         textSize(30);
@@ -532,59 +548,41 @@ public class App extends PApplet {
         text(wTimeString, (BOARD_WIDTH * CELLSIZE) + 10, 624);
 
         // for black's timer
-        fill(255,255,255);
+        fill(204,204,204);
         rect((BOARD_WIDTH * CELLSIZE) + 10, 48, 110, 96);
         fill(0, 0, 0);
         textSize(30);
         String bTimeString = String.format("%02d:%02d", bRemainingTime / 60, bRemainingTime % 60);
         text(bTimeString, (BOARD_WIDTH * CELLSIZE) + 10, 96);
+
+        // end of game messages
+        if (checkmated == true){
+            noLoop();
+            textSize(17);
+            fill(0, 0, 0);
+            String endMessage = "";
+            // if black wins
+            if(wKing.isCheckmate(boardArray) == true){
+                endMessage = "You lost by checkmate!";
+            // if white wins
+            } else if (wKing.isCheckmate(boardArray) == true){
+                endMessage = "You won by checkmate!";
+
+            } else if (resignation == true){
+                endMessage = "You lost by resignation";
+            // in the case of a stalemate
+            } else {
+                endMessage = "You won by checkmate!";
+            }
+            text(endMessage, 682, 156, 96, 96); 
+            text(restartMessage, 682, 400, 96, 96);
+        } else {
+            fill(204,204,204);
+            rect(682, 156, 400, 400);
+        }
     }
-
-    // while checkmate is false, players turn, then computers turn
-
-    // method for is check, at the end of each turn loop through board and check if anyones in check
-        // if in check, check for checkmate
-    // if in check at the start of turn, cannot be in check at the end
-    // if not in check at start of turn, cannot be in check at the end
 
     public static void main(String[] args) {
         PApplet.main("XXLChess.App");
-
-        
-        // if (yourTurn == false){
-        //     System.out.println("LMAO");
-        // }
-
-        // while (checkmated == false){
-        //     if (yourTurn == false){
-        //         System.out.println("making a move");
-        //         // if its checkmate and king is under threat, CPU loses
-        //         if(bKing.isCheck(boardArray) == true && bKing.isCheckmate(boardArray) == true){
-        //             ;
-        //         // if bKing cannot move anywhere but it is not under check, stalemate
-        //         } else if(bKing.isCheck(boardArray) == false && bKing.isCheckmate(boardArray) == true){
-        //             ;
-        //         } else {
-                    
-        //             OpponentMove move = opponent.calcMove(boardArray, bKing);
-                    
-        //             int oldX = (move.getPiece().getX())/CELLSIZE;
-        //             int oldY = (move.getPiece().getY())/CELLSIZE;
-        //             int newX = move.getX();
-        //             int newY = move.getY();
-
-        //             boardArray.get(oldY).set(oldX, null);
-        //             boardArray.get(newY).set(newX, move.getPiece());
-                    
-        //             move.getPiece().setX(newX * CELLSIZE);
-        //             move.getPiece().setY(newY * CELLSIZE);
-        //             System.out.println("was moved!");
-        //             move.getPiece().setFirstMove(false);
-        //             System.out.println("made the move");
-        //         }
-        //         yourTurn = true;
-        //     }
-        // }
     }
-
 }

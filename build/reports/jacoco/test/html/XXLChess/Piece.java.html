@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Piece.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">XXLChess</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">Piece.java</span></div><h1>Piece.java</h1><pre class="source lang-java linenums">package XXLChess;
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONObject;
+import processing.data.JSONArray;
+import processing.core.PFont;
+import processing.event.MouseEvent;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.awt.Font;
+import java.io.*;
+import java.util.*;
+
+
+public abstract class Piece {
+
+    private String colour;
+    private PImage sprite;
+    private double value;
+<span class="nc" id="L21">    private boolean firstMove = true;</span>
+    protected int x;
+    protected int y;
+
+<span class="nc" id="L25">    public Piece(String colour, int x, int y, double value){</span>
+<span class="nc" id="L26">        this.colour = colour;</span>
+<span class="nc" id="L27">        this.x = x;</span>
+<span class="nc" id="L28">        this.y = y;</span>
+<span class="nc" id="L29">        this.value = value;</span>
+<span class="nc" id="L30">    }</span>
+
+    // setters
+    public void setX(int x){
+<span class="nc" id="L34">        this.x = x;</span>
+<span class="nc" id="L35">    }</span>
+
+    public void setY(int y){
+<span class="nc" id="L38">        this.y = y;</span>
+<span class="nc" id="L39">    }</span>
+
+    public void setFirstMove(boolean firstMove){
+<span class="nc" id="L42">        this.firstMove = firstMove;</span>
+<span class="nc" id="L43">    }</span>
+
+    // getters
+    public String getColour(){
+<span class="nc" id="L47">        return this.colour;</span>
+    }
+
+    public int getX(){
+<span class="nc" id="L51">        return this.x;</span>
+    }
+
+    public int getY(){
+<span class="nc" id="L55">        return this.y;</span>
+    }
+
+    public double getValue(){
+<span class="nc" id="L59">        return this.value;</span>
+    }
+
+    public boolean getFirstMove(){
+<span class="nc" id="L63">        return this.firstMove;</span>
+    }
+
+
+    // methods
+    public abstract void tick();
+
+    public abstract boolean isValidMove(int xPos, int yPos, ArrayList&lt;ArrayList&lt;Piece&gt;&gt; boardArray);
+
+    public void setSprite(PImage sprite){
+<span class="nc" id="L73">        this.sprite = sprite;</span>
+<span class="nc" id="L74">    }</span>
+
+    public void draw(PApplet app){
+<span class="nc" id="L77">        app.image(this.sprite, this.x, this.y, 48, 48);</span>
+<span class="nc" id="L78">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Pawn.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">XXLChess</a> &gt; <a href="index.source.html" class="el_package">XXLChess</a> &gt; <span class="el_source">Pawn.java</span></div><h1>Pawn.java</h1><pre class="source lang-java linenums">package XXLChess;
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONObject;
+import processing.data.JSONArray;
+import processing.core.PFont;
+import processing.event.MouseEvent;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.awt.Font;
+import java.io.*;
+import java.util.*;
+
+public class Pawn extends Piece {
+
+    public Pawn(String colour, int x, int y){
+<span class="nc" id="L18">        super(colour, x, y, 1);</span>
+<span class="nc" id="L19">    }</span>
+
+    public void tick(){
+        
+<span class="nc" id="L23">    }</span>
+
+    public boolean isValidMove(int xPos, int yPos, ArrayList&lt;ArrayList&lt;Piece&gt;&gt; boardArray){
+<span class="nc" id="L26">        int xCell = x / 48;</span>
+<span class="nc" id="L27">        int yCell = y / 48;</span>
+<span class="nc" id="L28">        Piece targetSpot = boardArray.get(yPos).get(xPos);</span>
+
+<span class="nc" id="L30">        int direction = 0;</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        if (this.getColour() == &quot;white&quot;){</span>
+<span class="nc" id="L32">            direction = -1;</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        } else if (this.getColour() == &quot;black&quot;){</span>
+<span class="nc" id="L34">            direction = 1;</span>
+        }
+
+        // if first move can move two ahead
+<span class="nc bnc" id="L38" title="All 6 branches missed.">        if (getFirstMove() == true &amp;&amp; yPos == (yCell + (2 * direction)) &amp;&amp; xCell == xPos){</span>
+            // Check if any pieces between move and current location
+<span class="nc" id="L40">            int tempX = Integer.signum(xPos - xCell);</span>
+<span class="nc" id="L41">            int tempY = Integer.signum(yPos - yCell);</span>
+<span class="nc" id="L42">            int checkedX = xCell + tempX;</span>
+<span class="nc" id="L43">            int checkedY = yCell + tempY;</span>
+<span class="nc bnc" id="L44" title="All 4 branches missed.">            while (checkedX != xPos || checkedY != yPos) {</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">                if (boardArray.get(checkedY).get(checkedX) != null) {</span>
+                    // System.out.println(&quot;AHA A PIECE!&quot;);
+<span class="nc" id="L47">                    return false;</span>
+                }
+<span class="nc" id="L49">            checkedX += tempX;</span>
+<span class="nc" id="L50">            checkedY += tempY;</span>
+            }
+<span class="nc" id="L52">            return true;</span>
+
+        // Check that move is directly one ahead
+<span class="nc bnc" id="L55" title="All 6 branches missed.">        } else if ((yCell + direction) == yPos &amp;&amp; xCell == xPos &amp;&amp; targetSpot == null) {</span>
+<span class="nc" id="L56">            return true;</span>
+
+        // if piece is diagonal right can kill
+<span class="nc bnc" id="L59" title="All 8 branches missed.">        } else if (yPos == (yCell + direction) &amp;&amp; xPos == (xCell + 1) &amp;&amp; targetSpot != null &amp;&amp; targetSpot.getColour() != this.getColour()){</span>
+<span class="nc" id="L60">            return true;</span>
+
+        // if piece is diagonal left can kill
+<span class="nc bnc" id="L63" title="All 8 branches missed.">        } else if (yPos == (yCell + direction) &amp;&amp; xPos == (xCell - 1) &amp;&amp; targetSpot != null &amp;&amp; targetSpot.getColour() != this.getColour()){</span>
+<span class="nc" id="L64">            return true;</span>
+            
+        } else {
+<span class="nc" id="L67">            return false;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

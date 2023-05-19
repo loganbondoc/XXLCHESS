@@ -1,4 +1,4 @@
-RNBHCGA GCEBNR
+RNBHCGAKGCEBNR
 PPPPPPPPPPPPPP
 
 
@@ -7,8 +7,8 @@ PPPPPPPPPPPPPP
 
 
 
-K   kppppppppp
+
 
 
 pppppppppppppp
-rnbhcga gcebnr
+rnbhcgakgcebnr
