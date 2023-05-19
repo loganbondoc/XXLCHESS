@@ -285,17 +285,25 @@ public class Opponent {
                 // sort moves from the pieces of the lowest value to the highest
                 for (int i = 0; i < tradingMoves.size() - 1; i++) {
                     for (int j = 0; j < tradingMoves.size() - i - 1; j++) {
-                        double pieceValue = tradingMoves.get(j).getPiece().getValue();
-                        double nextPieceValue = tradingMoves.get(j + 1).getPiece().getValue();
-                        if (pieceValue > nextPieceValue) {
+                        // minus the value of the players piece that is taken from the CPU piece that is in danger
+                        // sort in ascending order
+                        double theirPieceValue = boardArray.get(tradingMoves.get(j).getY()).get(tradingMoves.get(j).getX()).getValue();
+                        double yourPieceValue = tradingMoves.get(j).getPiece().getValue();
+                        double tradeValue = yourPieceValue - theirPieceValue;
+
+                        double nTheirPieceValue = boardArray.get(tradingMoves.get(j + 1).getY()).get(tradingMoves.get(j + 1).getX()).getValue();
+                        double nYourPieceValue = tradingMoves.get(j + 1).getPiece().getValue();
+                        double nTradeValue = nYourPieceValue - nTheirPieceValue;
+
+                        if (tradeValue > nTradeValue) {
                             // swap them
-                            OpponentMove temp = attackingMoves.get(j);
-                            attackingMoves.set(j, attackingMoves.get(j + 1));
-                            attackingMoves.set(j + 1, temp);
+                            OpponentMove temp = tradingMoves.get(j);
+                            tradingMoves.set(j, tradingMoves.get(j + 1));
+                            tradingMoves.set(j + 1, temp);
                         }
                     }
                 }
-                // returns highest value move
+                // returns highest value trade move
                 return tradingMoves.get(0);
             
             // if there are no attacking or trading moves, make a neutral move

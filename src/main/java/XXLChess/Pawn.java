@@ -36,6 +36,11 @@ public class Pawn extends Piece {
 
         // if first move can move two ahead
         if (getFirstMove() == true && yPos == (yCell + (2 * direction)) && xCell == xPos){
+            // cannot kill pieces two ahead
+            if (boardArray.get(yPos).get(xPos) != null){
+                return false;
+            }
+            
             // Check if any pieces between move and current location
             int tempX = Integer.signum(xPos - xCell);
             int tempY = Integer.signum(yPos - yCell);
